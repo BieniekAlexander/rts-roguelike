@@ -1,0 +1,91 @@
+## A camera angled at 45 degrees from above
+class_name RTSCamera3D extends Camera3D
+
+## CONTROL STATE
+@export var movement_speed: float = .2
+@export var movement_friction: float = 1.5
+@export var rotation_speed: float = 0.66
+@export var zoom_speed: float = 20.0
+var dragging_camera: bool = false
+var move_reference_position: Vector2
+
+@export_category("Input Actions")
+@export var rotate_left_action: String = "isometric_camera_rotate_left"
+@export var rotate_right_action: String = "isometric_camera_rotate_right"
+@export var zoom_in_action: String = "isometric_camera_zoom_in"
+@export var zoom_out_action: String = "isometric_camera_zoom_out"
+
+var move_velocity: Vector3 = Vector3.ZERO
+var zoom_velocity: Vector3 = Vector3.ZERO
+
+## Conditional control function reference
+var zoom_in: Callable
+var zoom_out: Callable
+
+func get_screen_position_normalized(screen_position_raw: Vector2) -> Vector2:
+	return (screen_position_raw*2/get_viewport().get_visible_rect().size)-Vector2.ONE
+
+func _init():
+	if projection == PROJECTION_PERSPECTIVE:
+		zoom_in = zoom_in_perspective
+		zoom_out = zoom_out_perspective
+	if projection == PROJECTION_ORTHOGONAL:
+		zoom_in = zoom_in_orthogonal
+		zoom_out = zoom_out_orthogonal
+	else:
+		push_error("Cannot set zoom functionality, unsupported Camera3D projection setting: %s" % projection)
+
+func _input(event: InputEvent):
+	## CONTROL STATE
+	if event.is_action_pressed("isometric_camera_drag"):
+		move_reference_position = get_screen_position_normalized(event.position)
+		dragging_camera = true
+	elif event.is_action_released("isometric_camera_drag"):
+		dragging_camera = false
+	## MOUSE MOVEMENT
+	elif event is InputEventMouseMotion:
+		if dragging_camera:
+			move_velocity = -VU.fromXZ(
+				get_screen_position_normalized(event.position) - move_reference_position
+			) * size * movement_speed
+		
+
+func _process(delta: float) -> void:
+	if !dragging_camera:
+		move_velocity = Vector3.ZERO
+	
+	global_position += move_velocity
+	
+	#if direction == Vector3.ZERO:
+		#velocity.x = move_toward(velocity.x, 0, movement_friction * delta)
+		#velocity.z = move_toward(velocity.z, 0, movement_friction * delta)
+	#else:
+		#velocity.x = lerp(velocity.x, direction.x, movement_speed * delta)
+		#velocity.z = lerp(velocity.z, direction.z, movement_speed * delta)
+	
+	if Input.is_action_pressed(rotate_left_action):
+		rotation.y += rotation_speed * delta
+	if Input.is_action_pressed(rotate_right_action):
+		rotation.y -= rotation_speed * delta
+	
+	if Input.is_action_just_pressed(zoom_in_action):
+		zoom_in.call(delta, zoom_speed)
+	elif Input.is_action_just_pressed(zoom_out_action):
+		zoom_out.call(delta, zoom_speed)
+
+## Zoom functions
+func zoom_in_orthogonal(delta: float, zoom_speed: float) -> void:
+	size /= (100+zoom_speed)/100
+	
+func zoom_out_orthogonal(delta: float, zoom_speed: float) -> void:
+	size *= (100+zoom_speed)/100
+	
+func zoom_in_perspective(delta: float, zoom_speed: float) -> void:
+	zoom_velocity = -global_transform.basis.z * zoom_speed * delta
+	zoom_velocity = lerp(zoom_velocity, Vector3.ZERO, (zoom_speed / 2) * delta)
+	position += zoom_velocity
+	
+func zoom_out_perspective(delta: float, zoom_speed: float) -> void:
+	zoom_velocity = global_transform.basis.z * zoom_speed * delta
+	zoom_velocity = lerp(zoom_velocity, Vector3.ZERO, (zoom_speed / 2) * delta)
+	position += zoom_velocity

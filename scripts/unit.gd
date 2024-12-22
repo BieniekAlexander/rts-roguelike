@@ -29,19 +29,19 @@ func get_collision_extents() -> Array[Vector2]:
 		VU.inXZ(global_position)+Vector2.LEFT*collider_radius,
 		VU.inXZ(global_position)+Vector2.RIGHT*collider_radius
 	]
-	
+
 ## MOVEMENT
 var map: HexGrid
 @export var AGGRO_RANGE: float = 5
 @export var SPEED: float = .1
 @onready var nav: NavigationAgent3D = $NavigationAgent
-@onready var command_queue: Array[Dictionary] = []
+@onready var _command_queue: Array[Command] = []
 @onready var _command: Command = null
 @onready var path: Vector3 = Vector3.ZERO
 
 var xz_position: Vector2:
 	get: return VU.inXZ(global_position)
-	
+
 func _get_path(a_target_position: Vector3) -> Vector3:
 	if a_target_position == Vector3.INF:
 		return Vector3.ZERO 
@@ -80,7 +80,7 @@ func _check_aggro() -> void:
 			unit.owner_id != owner_id
 			and (global_position-unit.global_position).length_squared() < pow(AGGRO_RANGE, 2)
 		):
-			_command = Command.new(unit)
+			_command = Command.new(unit, Command.TYPE.MOVE)
 			return
 
 ## NODE
@@ -100,16 +100,22 @@ func _process(delta: float) -> void:
 	
 	if ATTACK_RANGE>0:
 		shotParticles.emitting = attack_timer>0
+		
+func _on_death() -> void:
+	for cell: HexCell in cells.get_values():
+		cell.remove_unit(self)
+	
+	queue_free()
 
 func _recalculate_state() -> void:
 	if HP <= 0:
-		queue_free()
+		_on_death()
 	
 	if attack_timer>0:
 		attack_timer-=1
 	
-	if _command == null and not command_queue.is_empty():
-		_command = command_queue.pop_front()
+	if _command == null and not _command_queue.is_empty():
+		_command = _command_queue.pop_front()
 
 func _physics_process(delta: float) -> void:
 	_recalculate_state()
@@ -129,7 +135,7 @@ func _physics_process(delta: float) -> void:
 						)
 					)
 		else:
-			if _command.aggro:
+			if _command.type == Command.TYPE.ATTACK_MOVE:
 				_check_aggro()
 			
 			var path = _get_path(_command.position)
@@ -141,17 +147,22 @@ func _physics_process(delta: float) -> void:
 	else:
 		_check_aggro()
 
-## EVENTS
-func on_select():
+## CONTROLS
+func set_selected() -> void:
 	$SelectionIndicator.visible = true
 	$HPBar.visible = true
-	
-func on_deselect():
+
+func set_deselected() -> void:
 	$SelectionIndicator.visible = false
-	
+
 	if HP==100:
 		$HPBar.visible = false
-	
-func on_send(command: Command):
-	_command = command
-	#command_queue = [collision]
+
+func set_command(command: Command, add_to_queue: bool) -> void:
+	if add_to_queue:
+		_command_queue.append(command)
+	elif command.type==Command.TYPE.STOP:
+		_command = null
+	else:
+		_command_queue = []
+		_command = command

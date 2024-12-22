@@ -2,8 +2,8 @@ class_name HexGrid
 extends Node
 
 ## INPUT HANDLING
-@onready var camera: IsometricCamera3D = get_viewport().get_camera_3d()
-@onready var put: RTSMouseInput = get_tree().root.get_node("Root/Player/RTSMouseInput")
+@onready var camera: RTSCamera3D = get_viewport().get_camera_3d()
+@onready var put: RTSController = get_tree().root.get_node("Root/Player/Controller")
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
@@ -20,19 +20,6 @@ func _unhandled_input(event):
 				else:
 					print_rich("[color=#88FF88]STRUCTURE: %s[/color]" % c.index)
 				# TODO position to hex grid index still isn't perfect - something seems to happen when rounding around 0?
-		elif event.button_index == MOUSE_BUTTON_MIDDLE:
-			var map_position: Vector2 = VU.inXZ(get_mouse_world_position(event.position))
-			var u: Unit = get_obstruction(map_position)
-			if u != null:
-				print("Hi you're hitting %s" % u)
-	elif event is InputEventKey:
-		if event.pressed and event.keycode == KEY_SPACE:
-			print("checking cells")
-			for i in evenq_grid:
-				for j in evenq_grid[i]:
-					var cell: HexCell = evenq_grid[i][j]
-					if !cell.units.is_empty():
-						print("%s, %s has %s" % [i, j, cell.units])
 
 ## SPACE THINGS
 @onready var navmesh: NavigationRegion3D = $NavigationRegion
@@ -69,7 +56,6 @@ var units: Array:
 	get: return get_tree().get_nodes_in_group("rts_selectable")
 
 func update_unit_position(unit: Unit) -> void:
-	print("setting position for %s" % unit)
 	var cells = Set.new(unit.get_collision_extents().map(func(pos): return get_map_cell(pos)))
 	var new_cells = cells.difference(unit.cells)
 	var old_cells = unit.cells.difference(cells)
@@ -100,15 +86,15 @@ func evaluate_movement(unit: Unit, movement: Vector3) -> bool:
 	
 	if pen_vec != -Vector2.INF:
 		if abs(pen_vec) > abs(xz_movement):
-			return true
+			movement = Vector3.ZERO
 		elif abs(pen_vec.x) < abs(pen_vec.y):
-			unit.global_position += movement - Vector3(pen_vec.x, 0, 0)
+			movement -= Vector3(pen_vec.x, 0, 0)
 		else:
-			unit.global_position += movement - Vector3(0, 0, pen_vec.y)
-		return true
-	else:
-		unit.global_position += movement
-		return false
+			movement -= Vector3(0, 0, pen_vec.y)
+	
+	unit.global_position += movement
+	update_unit_position(unit)
+	return (pen_vec != -Vector2.INF)
 
 func get_obstruction(hex_coordinate: Vector2) -> Unit:
 	var cell: HexCell = get_map_cell(hex_coordinate)

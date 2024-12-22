@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3 uid="uid://bereove55vuvk"]
 
 [ext_resource type="PackedScene" uid="uid://brswqxlmk24kk" path="res://scenes/map.tscn" id="1_5ojvs"]
-[ext_resource type="Script" path="res://addons/nodot/camera/IsometricCamera3D.gd" id="2_2nk8l"]
-[ext_resource type="Script" path="res://addons/nodot/kits/RTS/RTSMouseInput.gd" id="3_y7scq"]
+[ext_resource type="Script" path="res://scripts/interface/rts_camera_3d.gd" id="2_2nk8l"]
+[ext_resource type="Script" path="res://scripts/interface/rts_controller.gd" id="3_y7scq"]
 [ext_resource type="PackedScene" uid="uid://blcglpbttoi64" path="res://scenes/unit.tscn" id="4_nd07g"]
 
 [sub_resource type="GDScript" id="GDScript_bvbwt"]
@@ -15,6 +15,8 @@ script/source = "extends Control
 [node name="Root" type="Node"]
 
 [node name="Map" parent="." instance=ExtResource("1_5ojvs")]
+X_RANGE = null
+Y_RANGE = null
 
 [node name="RangedUnit1" parent="Map" instance=ExtResource("4_nd07g")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, -5.77242)
@@ -41,7 +43,7 @@ AGGRO_RANGE = 3.0
 [node name="MeleeUnit3" parent="Map" instance=ExtResource("4_nd07g")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.93381, -0.3, 0)
 owner_id = 1
-AGGRO_RANGE = 10.0
+AGGRO_RANGE = 3.0
 
 [node name="Player" type="Control" parent="."]
 layout_mode = 3
@@ -54,16 +56,14 @@ projection = 1
 size = 20.0
 far = 400.0
 script = ExtResource("2_2nk8l")
-enabled = true
 
-[node name="Controls" type="Node3D" parent="Player" node_paths=PackedStringArray("selection_box", "camera")]
+[node name="Controller" type="Node3D" parent="Player" node_paths=PackedStringArray("selection_box", "camera")]
 transform = Transform3D(3.58671, 0, 0, 0, 3.58671, 0, 0, 0, 3.58671, 0, 0, 0)
 script = ExtResource("3_y7scq")
 selection_box = NodePath("SelectionBox")
 camera = NodePath("../Camera")
-max_projection_distance = 100.0
 
-[node name="SelectionBox" type="ColorRect" parent="Player/Controls"]
+[node name="SelectionBox" type="ColorRect" parent="Player/Controller"]
 visible = false
 offset_right = 40.0
 offset_bottom = 40.0

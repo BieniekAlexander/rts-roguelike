@@ -7,3 +7,9 @@ res://scripts/command.gd
 res://addons/nodot/kits/RTS/RTSMouseInput.gd
 res://addons/nodot/kits/RTS/RTSSelectable.gd
 res://scripts/hex_grid.gd
+res://addons/nodot/camera/IsometricCamera3D.gd
+res://scripts/interface/RTSController.gd
+res://scenes/structure.tscn
+res://scripts/interface/rts_controller.gd
+res://scripts/interface/RTSCamera3D.gd
+res://scripts/interface/rts_camera_3d.gd
