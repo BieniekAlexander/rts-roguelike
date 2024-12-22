@@ -1,5 +1,5 @@
 class_name Unit
-extends NodotCharacter3D
+extends CharacterBody3D
 
 ## IDENTIFIERS
 @export_range(0, 3) var owner_id: int
