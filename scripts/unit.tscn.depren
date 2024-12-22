@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=3 uid="uid://bereove55vuvk"]
+
+[ext_resource type="Script" path="res://scripts/unit.gd" id="2_auids"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="2_kmj71"]
+[ext_resource type="Texture2D" uid="uid://b83swchiycb7v" path="res://assets/classic/tiles/logo.png" id="2_sqqjs"]
+[ext_resource type="Script" path="res://addons/nodot-rts/camera/IsometricCamera3D.gd" id="4_jcafy"]
+[ext_resource type="Script" path="res://addons/nodot-rts/kits/RTS/RTSMouseInput.gd" id="5_qyy4b"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_0a58x"]
+radius = 0.001
+
+[node name="Root" type="Node"]
+
+[node name="Player" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("2_kmj71")
+
+[node name="Perspective" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, -0.707107, 0.707107, 0, -0.707107, -0.707107, 0, 10, -10)
+script = ExtResource("4_jcafy")
+
+[node name="RTSMouseInput" type="Node3D" parent="Player"]
+script = ExtResource("5_qyy4b")
+
+[node name="SelectionBox" type="ColorRect" parent="Player/RTSMouseInput"]
+visible = false
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(0.656404, 0.975195, 0.972357, 0.498039)
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="Unit" type="CharacterBody3D" parent="World" groups=["unit"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.50422, 0.413761, 1.15206)
+script = ExtResource("2_auids")
+
+[node name="Sprite" type="Sprite3D" parent="World/Unit"]
+texture = ExtResource("2_sqqjs")
+
+[node name="Collider" type="CollisionShape3D" parent="World/Unit"]
+shape = SubResource("SphereShape3D_0a58x")
+
+[node name="SelectionIndicator" type="Sprite3D" parent="World/Unit"]
+
+[node name="Unit2" type="CharacterBody3D" parent="World" groups=["unit"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.34258, 0.865028, 0)
+script = ExtResource("2_auids")
+
+[node name="Sprite3D" type="Sprite3D" parent="World/Unit2"]
+texture = ExtResource("2_sqqjs")
+
+[node name="Collider" type="CollisionShape3D" parent="World/Unit2"]
+shape = SubResource("SphereShape3D_0a58x")
+
+[node name="SelectionIndicator" type="Sprite3D" parent="World/Unit2"]

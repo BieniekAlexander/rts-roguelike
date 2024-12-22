@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://brswqxlmk24kk"]
+
+[ext_resource type="Script" path="res://scripts/hex_grid.gd" id="1_faupn"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_kpdvm"]
+vertices = PackedVector3Array(-19, 1, -19, -19, 1, 19, 19, 1, 19, 19, 1, -19)
+polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
+geometry_parsed_geometry_type = 1
+agent_height = 1.0
+agent_radius = 0.4
+
+[sub_resource type="Gradient" id="Gradient_gtpdc"]
+offsets = PackedFloat32Array(0.55, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0.0375696, 0.30892, 0.211246, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_62eqx"]
+frequency = 0.0013
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_4tnet"]
+color_ramp = SubResource("Gradient_gtpdc")
+noise = SubResource("FastNoiseLite_62eqx")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7vqeb"]
+size = Vector3(40, 1, 40)
+
+[node name="Map" type="Node3D"]
+script = ExtResource("1_faupn")
+
+[node name="NavigationRegion" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_kpdvm")
+
+[node name="Floor" type="StaticBody3D" parent="NavigationRegion"]
+
+[node name="Sprite" type="Sprite3D" parent="NavigationRegion/Floor"]
+transform = Transform3D(8, 4.47035e-09, -1.22128e-16, 0, -3.49691e-07, -5, -4.47035e-09, 8, -2.18557e-07, 0, 0, 0)
+visible = false
+render_priority = -1
+texture = SubResource("NoiseTexture2D_4tnet")
+
+[node name="Collider" type="CollisionShape3D" parent="NavigationRegion/Floor"]
+shape = SubResource("BoxShape3D_7vqeb")

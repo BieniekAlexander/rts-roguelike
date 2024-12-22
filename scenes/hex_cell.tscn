@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://d0uxj3j3rxnwi"]
+
+[ext_resource type="Script" path="res://scripts/hex_cell.gd" id="1_64yu5"]
+[ext_resource type="Texture2D" uid="uid://c4etrbjnm8d43" path="res://assets/hexagon.png" id="2_e1q41"]
+
+[node name="HexCell" type="Node3D"]
+transform = Transform3D(0.72, 0, 0, 0, 1, 0, 0, 0, 0.72, 0, 0, 0)
+script = ExtResource("1_64yu5")
+
+[node name="Tile" type="Sprite3D" parent="."]
+axis = 1
+render_priority = -5
+texture = ExtResource("2_e1q41")
