@@ -1,9 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://bereove55vuvk"]
+[gd_scene load_steps=7 format=3 uid="uid://bereove55vuvk"]
 
 [ext_resource type="PackedScene" uid="uid://brswqxlmk24kk" path="res://scenes/map.tscn" id="1_5ojvs"]
 [ext_resource type="Script" path="res://scripts/interface/rts_camera_3d.gd" id="2_2nk8l"]
 [ext_resource type="Script" path="res://scripts/interface/rts_controller.gd" id="3_y7scq"]
 [ext_resource type="PackedScene" uid="uid://blcglpbttoi64" path="res://scenes/unit.tscn" id="4_nd07g"]
+
+[sub_resource type="MeshLibrary" id="MeshLibrary_na1pl"]
 
 [sub_resource type="GDScript" id="GDScript_bvbwt"]
 script/source = "extends Control
@@ -19,31 +21,27 @@ X_RANGE = null
 Y_RANGE = null
 
 [node name="RangedUnit1" parent="Map" instance=ExtResource("4_nd07g")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, -5.77242)
-DAMAGE = 1
-ATTACK_RANGE = 5
-ATTACK_DURATION = 3
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -5.772)
+ATTACK_RANGE = 5.0
 
 [node name="RangedUnit2" parent="Map" instance=ExtResource("4_nd07g")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, -0.3, -4)
-DAMAGE = 2
-ATTACK_RANGE = 5
-ATTACK_DURATION = 3
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.5, -4)
+ATTACK_RANGE = 5.0
 
 [node name="MeleeUnit1" parent="Map" instance=ExtResource("4_nd07g")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.29, 2.158)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 2.158)
 owner_id = 1
-AGGRO_RANGE = 3.0
 
 [node name="MeleeUnit2" parent="Map" instance=ExtResource("4_nd07g")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.03987, -0.3, 2.037)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.04, 0.5, 2.037)
 owner_id = 1
-AGGRO_RANGE = 3.0
 
 [node name="MeleeUnit3" parent="Map" instance=ExtResource("4_nd07g")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.93381, -0.3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.934, 0.5, 0)
 owner_id = 1
-AGGRO_RANGE = 3.0
+
+[node name="GridMap" type="GridMap" parent="Map"]
+mesh_library = SubResource("MeshLibrary_na1pl")
 
 [node name="Player" type="Control" parent="."]
 layout_mode = 3
@@ -54,7 +52,7 @@ script = SubResource("GDScript_bvbwt")
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 14.229, 5)
 projection = 1
 size = 20.0
-far = 400.0
+far = 500.0
 script = ExtResource("2_2nk8l")
 
 [node name="Controller" type="Node3D" parent="Player" node_paths=PackedStringArray("selection_box", "camera")]

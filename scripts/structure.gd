@@ -1,2 +1,0 @@
-class_name Structure
-extends StaticBody3D

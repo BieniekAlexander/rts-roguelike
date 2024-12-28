@@ -34,7 +34,7 @@ func _init(a_target: Variant, a_type: TYPE) -> void:
 	
 	if a_target is Vector3:
 		_position = a_target
-	elif a_target is Unit:
+	elif a_target is Commandable:
 		_target = a_target
 	else:
-		push_error("Unsupported command a_target type %s" % a_target)
+		assert(false, "Unsupported command a_target type %s" % a_target)

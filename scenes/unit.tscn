@@ -1,22 +1,22 @@
 [gd_scene load_steps=11 format=3 uid="uid://blcglpbttoi64"]
 
-[ext_resource type="Script" path="res://scripts/unit.gd" id="2_3agr1"]
-[ext_resource type="Texture2D" uid="uid://b83swchiycb7v" path="res://assets/classic/tiles/logo.png" id="3_qpxab"]
+[ext_resource type="Script" path="res://scripts/entities/unit.gd" id="2_3agr1"]
+[ext_resource type="Texture2D" uid="uid://bayqq8wrh6ypl" path="res://assets/greyscale/tiles/logo.png" id="2_tefpw"]
 [ext_resource type="Texture2D" uid="uid://bojbrs2dpggcv" path="res://assets/selection.png" id="3_uy385"]
 
-[sub_resource type="Gradient" id="Gradient_ulv2o"]
+[sub_resource type="Gradient" id="Gradient_clwnv"]
 offsets = PackedFloat32Array(0)
 colors = PackedColorArray(0, 0, 0, 1)
 
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_u25hc"]
-gradient = SubResource("Gradient_ulv2o")
+gradient = SubResource("Gradient_clwnv")
 
-[sub_resource type="Gradient" id="Gradient_4hdu4"]
+[sub_resource type="Gradient" id="Gradient_cdjbw"]
 offsets = PackedFloat32Array(1)
 colors = PackedColorArray(1, 0, 0, 1)
 
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_7qgak"]
-gradient = SubResource("Gradient_4hdu4")
+gradient = SubResource("Gradient_cdjbw")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_0ldvb"]
 direction = Vector3(0, 0, 1)
@@ -30,26 +30,29 @@ size = Vector2(0.2, 0.2)
 center_offset = Vector3(0, 0.5, 0)
 orientation = 1
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_qs727"]
-size = Vector3(0.5, 0.1, 0.5)
+[sub_resource type="SphereShape3D" id="SphereShape3D_hwjp0"]
 
-[node name="Unit" type="CharacterBody3D" groups=["rts_selectable"]]
+[node name="Unit" type="Node3D" groups=["commandable"]]
 script = ExtResource("2_3agr1")
 
+[node name="NavigationAgent" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.5
+target_desired_distance = 0.25
+path_max_distance = 10.01
+neighbor_distance = 10.0
+time_horizon_obstacles = 1.0
+max_speed = 3.0
+debug_enabled = true
+
 [node name="Sprite" type="Sprite3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0.3, -0.3)
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0)
 layers = 2
 axis = 1
 render_priority = 1
-texture = ExtResource("3_qpxab")
-
-[node name="SelectionIndicator" type="Sprite3D" parent="."]
-transform = Transform3D(0.5, 0, 0, 0, 0.353553, 0.353553, 0, -0.353553, 0.353553, 0, 0.3, -0.3)
-visible = false
-texture = ExtResource("3_uy385")
+texture = ExtResource("2_tefpw")
 
 [node name="HPBar" type="Node3D" parent="."]
-transform = Transform3D(0.333, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0.3, -0.7)
+transform = Transform3D(0.333, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0.3, -0.2)
 visible = false
 
 [node name="HPBarBack" type="Sprite3D" parent="HPBar"]
@@ -62,8 +65,10 @@ region_rect = Rect2(2, 0, 0, 0)
 render_priority = 5
 texture = SubResource("GradientTexture1D_7qgak")
 
-[node name="NavigationAgent" type="NavigationAgent3D" parent="."]
-radius = 0.55
+[node name="SelectionIndicator" type="Sprite3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 0.353553, 0.353553, 0, -0.353553, 0.353553, 0, 0, 0)
+visible = false
+texture = ExtResource("3_uy385")
 
 [node name="ShotParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
@@ -72,6 +77,7 @@ amount = 5
 process_material = SubResource("ParticleProcessMaterial_0ldvb")
 draw_pass_1 = SubResource("QuadMesh_okfd7")
 
-[node name="Collider" type="CollisionShape3D" parent="."]
-transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0, 0)
-shape = SubResource("BoxShape3D_qs727")
+[node name="Body" type="StaticBody3D" parent="."]
+
+[node name="Collider" type="CollisionShape3D" parent="Body"]
+shape = SubResource("SphereShape3D_hwjp0")

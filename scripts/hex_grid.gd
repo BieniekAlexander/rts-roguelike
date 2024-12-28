@@ -53,56 +53,33 @@ func get_mouse_world_position(screen_position: Vector2) -> Vector3:
 
 ## MOVEMENT AND COLLISION
 var units: Array:
-	get: return get_tree().get_nodes_in_group("rts_selectable")
+	get: return get_tree().get_nodes_in_group("commandable").filter(func(c: Commandable): return c is Unit)
 
-func update_unit_position(unit: Unit) -> void:
-	var cells = Set.new(unit.get_collision_extents().map(func(pos): return get_map_cell(pos)))
-	var new_cells = cells.difference(unit.cells)
-	var old_cells = unit.cells.difference(cells)
+func update_commandable_position(c: Commandable) -> void:
+	var cells = Set.new(
+		c.get_collision_extents().map(
+			func(pos: Vector2): return get_map_cell(pos)
+		).filter(
+			func(cell: HexCell): return cell != null
+		)
+	)
+	var new_cells: Set = cells.difference(c.cells)
+	var old_cells: Set = c.cells.difference(cells)
 	
 	for cell: HexCell in old_cells.get_values():
-		cell.remove_unit(unit)
+		cell.remove_unit(c)
 		
 	for cell: HexCell in new_cells.get_values():
-		cell.add_unit(unit)
+		cell.add_unit(c)
 		
-	unit.cells = cells
+	c.cells = cells
 
-## updates a unit's movement and returns true if the movement "is complete" - for now, if there was a collision
-func evaluate_movement(unit: Unit, movement: Vector3) -> bool:
-	var xz_movement = VU.inXZ(movement)
-	var pen_vec: Vector2 = units.map(
-		func(u): return (
-			CU.check_penetration_vector(unit, u, xz_movement)
-			if unit!=u
-			else Vector2.ZERO
-		)
-	).filter(
-		func(pen): return (pen.x!=0 and pen.y!=0)
-	).reduce(
-		func(p1: Vector2, p2: Vector2): return p1.max(p2),
-		-Vector2.INF
-	)
-	
-	if pen_vec != -Vector2.INF:
-		if abs(pen_vec) > abs(xz_movement):
-			movement = Vector3.ZERO
-		elif abs(pen_vec.x) < abs(pen_vec.y):
-			movement -= Vector3(pen_vec.x, 0, 0)
-		else:
-			movement -= Vector3(0, 0, pen_vec.y)
-	
-	unit.global_position += movement
-	update_unit_position(unit)
-	return (pen_vec != -Vector2.INF)
-
-func get_obstruction(hex_coordinate: Vector2) -> Unit:
+func get_commmandable_at_position(hex_coordinate: Vector2) -> Commandable:
 	var cell: HexCell = get_map_cell(hex_coordinate)
 	
-	for unit: Unit in cell.units:
-		print(unit)
-		if CU.point_in_collider_2d(hex_coordinate, unit.collider):
-			return unit
+	for c: Commandable in cell.commandables.get_values():
+		if CU.point_in_collider_2d(hex_coordinate, c.collider):
+			return c
 			
 	return null
 
@@ -126,9 +103,13 @@ func _init_grid() -> void:
 func _ready() -> void:
 	_init_grid()
 
-	for unit: Unit in get_tree().get_nodes_in_group("rts_selectable"):
-		unit.initialize(self)
-		unit.reparent(navmesh)
-		update_unit_position(unit)
+	for c: Commandable in get_tree().get_nodes_in_group("commandable"):
+		c.initialize(self)
+		#c.reparent(navmesh)
+		update_commandable_position(c)
 		
 	navmesh.bake_navigation_mesh()
+
+func _process(delta: float) -> void:
+	if Input.is_key_pressed(KEY_SPACE):
+		print("hi")

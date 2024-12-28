@@ -26,10 +26,11 @@ func remove_all(elements) -> Set:
 		remove(element)
 	
 	return self
-	
+
 func clear()  -> Set:
 	hash_set.clear()
 	return self
+
 
 ## LIST COMPREHENSION
 func filter(condition: Callable) -> Set:
@@ -47,12 +48,14 @@ func map(function: Callable) -> Set:
 	hash_set = new_hash_set
 	return self
 
+
 ## MEMBERSHIP
 func contains(element) -> bool:
 	return hash_set.has(element)
 
 func get_values() -> Array:
 	return hash_set.keys()
+
 
 ## STATE
 func is_empty() -> bool:
@@ -61,12 +64,13 @@ func is_empty() -> bool:
 func size() -> int:
 	return hash_set.size()
 
+
 ## ARITHMETIC
 func union(other_set: Set) -> Set:
 	var ret: Set = Set.new(get_values())
 	ret.add_all(other_set.get_values())
 	return ret
-	
+
 func intersection(other_set: Set) -> Set:
 	var ret: Set = Set.new()
 	
@@ -80,7 +84,8 @@ func difference(other_set: Set) -> Set:
 	var ret: Set = Set.new(get_values())
 	ret.remove_all(other_set.get_values())
 	return ret
-	
+
+
 ## NODE
 func _init(values: Array = []) -> void:
 	hash_set = Dictionary()

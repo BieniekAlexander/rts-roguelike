@@ -2,7 +2,7 @@
 class_name RTSCamera3D extends Camera3D
 
 ## CONTROL STATE
-@export var movement_speed: float = .2
+@export var movement_speed: float = 1
 @export var movement_friction: float = 1.5
 @export var rotation_speed: float = 0.66
 @export var zoom_speed: float = 20.0
@@ -15,7 +15,6 @@ var move_reference_position: Vector2
 @export var zoom_in_action: String = "isometric_camera_zoom_in"
 @export var zoom_out_action: String = "isometric_camera_zoom_out"
 
-var move_velocity: Vector3 = Vector3.ZERO
 var zoom_velocity: Vector3 = Vector3.ZERO
 
 ## Conditional control function reference
@@ -45,17 +44,14 @@ func _input(event: InputEvent):
 	## MOUSE MOVEMENT
 	elif event is InputEventMouseMotion:
 		if dragging_camera:
-			move_velocity = -VU.fromXZ(
-				get_screen_position_normalized(event.position) - move_reference_position
+			var new_mouse_pos: Vector2 = get_screen_position_normalized(event.position)
+			global_position += -VU.fromXZ(
+				new_mouse_pos - move_reference_position
 			) * size * movement_speed
+			move_reference_position = new_mouse_pos
 		
 
 func _process(delta: float) -> void:
-	if !dragging_camera:
-		move_velocity = Vector3.ZERO
-	
-	global_position += move_velocity
-	
 	#if direction == Vector3.ZERO:
 		#velocity.x = move_toward(velocity.x, 0, movement_friction * delta)
 		#velocity.z = move_toward(velocity.z, 0, movement_friction * delta)

@@ -11,7 +11,7 @@ var select_down_position: Vector2 = Vector2.ZERO
 
 ## GAMESTATE
 @onready var map: HexGrid = get_tree().current_scene.find_child("Map")
-var selected_units: Array[Node] = []
+var selection: Array[Node] = []
 
 ## NODE
 func _ready():
@@ -76,10 +76,10 @@ func set_selected_unit():
 	# that method checks for a collider, but the sprite is generally bigger in screen space than the collider,
 	# and I probably want to check for sprite collision
 	var hex_coorinate: Vector2 = VU.inXZ(map.get_mouse_world_position(mouse_position))
-	var unit: Unit = map.get_obstruction(hex_coorinate)
+	var unit: Commandable = map.get_commmandable_at_position(hex_coorinate)
 	
 	if unit != null:
-		selected_units.append(unit)
+		selection.append(unit)
 		unit.set_selected()
 	
 func set_selected_units():
@@ -90,41 +90,50 @@ func set_selected_units():
 		selection_box.position + Vector2(0.0, selection_box.size.y)
 	]
 	
-	for unit: Unit in get_tree().get_nodes_in_group("rts_selectable"):
+	for unit: Commandable in get_tree().get_nodes_in_group("commandable"):
 		var selected_screen_position = camera.unproject_position(unit.global_position)
 		if Geometry2D.is_point_in_polygon(selected_screen_position, selection_box_geometry):
-			selected_units.append(unit)
+			selection.append(unit)
 			unit.set_selected()
+
 
 func assign_command_to_units(
 	world_position: Vector3,
 	a_command_type: Command.TYPE,
 	add_to_queue: bool
-):
-	var active_selection = selected_units.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
+) -> void:
+	var active_selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
 	
 	if active_selection.size()==0:
 		return
 	else:
-		var xs: Array = active_selection.map(func(u: Unit): return u.xz_position.x)
-		var zs: Array = active_selection.map(func(u: Unit): return u.xz_position.y)
-		var centroid: Vector3 = Vector3((xs.max()+xs.min())/2, world_position.y, (zs.max()+zs.min())/2)
-		var path = world_position-centroid
+		var targeted_commandable = map.get_commmandable_at_position(VU.inXZ(world_position))
 		
-		for unit: Unit in active_selection:
-			unit.set_command(
-				Command.new(
-					VU.onXZ(unit.global_position+path),
-					a_command_type
-				),
-				add_to_queue
-			)
+		if targeted_commandable!=null:
+			print("attacking %s" % targeted_commandable)
+			for unit: Unit in active_selection:
+				unit.set_command(
+					Command.new(
+						targeted_commandable,
+						Command.TYPE.MOVE
+					),
+					add_to_queue
+				)
+		else:
+			for unit: Unit in active_selection:
+				unit.set_command(
+					Command.new(
+						VU.onXZ(world_position),
+						a_command_type
+					),
+					add_to_queue
+				)
 		
 		if !add_to_queue:
 			next_command_type = Command.TYPE.MOVE
 
 func deselect():
-	for unit: Unit in selected_units:
-		if is_instance_valid(unit):
-			unit.set_deselected()
-	selected_units = []
+	for c: Commandable in selection:
+		if is_instance_valid(c):
+			c.set_deselected()
+	selection = []

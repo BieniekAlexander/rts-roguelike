@@ -29,7 +29,7 @@ DebugManager="*res://addons/nooodot/autoload/DebugManager.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/nodot/plugin.cfg")
+enabled=PackedStringArray()
 
 [input]
 

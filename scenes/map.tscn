@@ -3,11 +3,10 @@
 [ext_resource type="Script" path="res://scripts/hex_grid.gd" id="1_faupn"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_kpdvm"]
-vertices = PackedVector3Array(-19, 1, -19, -19, 1, 19, 19, 1, 19, 19, 1, -19)
+vertices = PackedVector3Array(-19.5, 1, -19.5, -19.5, 1, 19.5, 19.5, 1, 19.5, 19.5, 1, -19.5)
 polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
 geometry_parsed_geometry_type = 1
 agent_height = 1.0
-agent_radius = 0.4
 
 [sub_resource type="Gradient" id="Gradient_gtpdc"]
 offsets = PackedFloat32Array(0.55, 1)
@@ -25,6 +24,8 @@ size = Vector3(40, 1, 40)
 
 [node name="Map" type="Node3D"]
 script = ExtResource("1_faupn")
+X_RANGE = null
+Y_RANGE = null
 
 [node name="NavigationRegion" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_kpdvm")

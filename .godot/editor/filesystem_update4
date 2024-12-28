@@ -2,3 +2,8 @@ res://scenes/game.tscn
 res://scenes/bullet.gdshader
 res://scenes/unit.tscn
 res://scenes/structure.tscn
+res://scenes/map.tscn
+res://scripts/entities/unit.gd
+res://scripts/entities/commandable.gd
+res://scripts/interface/rts_controller.gd
+res://scripts/hex_grid.gd
