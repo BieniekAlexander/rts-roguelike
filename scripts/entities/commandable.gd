@@ -29,11 +29,12 @@ var cells: Set = Set.new()
 @onready var collider: CollisionShape3D = $Body/Collider
 
 func get_collision_extents() -> Array[Vector2]:
-	var collider_radius = (
-		collider.shape.size.x*sqrt(2)
-		if collider.shape is BoxShape3D
-		else collider.shape.radius
-	)
+	var collider_radius
+	match typeof(collider.shape):
+		SphereShape3D: collider_radius = collider.shape.radius
+		BoxShape3D: collider_radius = collider.shape.size.x*sqrt(2)
+		ConcavePolygonShape3D:  collider_radius = 1
+		_: collider_radius = 1
 	
 	return [
 		VU.inXZ(global_position),

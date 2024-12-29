@@ -1,9 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://bereove55vuvk"]
+[gd_scene load_steps=9 format=3 uid="uid://bereove55vuvk"]
 
 [ext_resource type="PackedScene" uid="uid://brswqxlmk24kk" path="res://scenes/map.tscn" id="1_5ojvs"]
 [ext_resource type="Script" path="res://scripts/interface/rts_camera_3d.gd" id="2_2nk8l"]
 [ext_resource type="Script" path="res://scripts/interface/rts_controller.gd" id="3_y7scq"]
 [ext_resource type="PackedScene" uid="uid://blcglpbttoi64" path="res://scenes/unit.tscn" id="4_nd07g"]
+[ext_resource type="Script" path="res://scripts/mesh_gen.gd" id="4_wkj5x"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_qs6p4"]
 
 [sub_resource type="MeshLibrary" id="MeshLibrary_na1pl"]
 
@@ -16,9 +19,12 @@ script/source = "extends Control
 
 [node name="Root" type="Node"]
 
+[node name="HexMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.433285, 11.5788, 1.15584)
+mesh = SubResource("ArrayMesh_qs6p4")
+script = ExtResource("4_wkj5x")
+
 [node name="Map" parent="." instance=ExtResource("1_5ojvs")]
-X_RANGE = null
-Y_RANGE = null
 
 [node name="RangedUnit1" parent="Map" instance=ExtResource("4_nd07g")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -5.772)

@@ -1,9 +1,7 @@
-res://scenes/game.tscn
-res://scenes/bullet.gdshader
-res://scenes/unit.tscn
-res://scenes/structure.tscn
 res://scenes/map.tscn
-res://scripts/entities/unit.gd
+res://scenes/bullet.gdshader
+res://assets/hex_mesh/Mesh.res
+res://scenes/structure.tscn
+res://scenes/game.tscn
+res://scenes/unit.tscn
 res://scripts/entities/commandable.gd
-res://scripts/interface/rts_controller.gd
-res://scripts/hex_grid.gd

@@ -56,9 +56,9 @@ func _physics_process(delta: float) -> void:
 			var next_path_position: Vector3 = _nav_agent.get_next_path_position()
 			velocity = global_position.direction_to(next_path_position)*SPEED
 			move(velocity)
-			
+
 			if _command.type == Command.TYPE.ATTACK_MOVE:
 				_check_aggro()
 	else:
 		pass
-		_check_aggro()
+		# _check_aggro()
