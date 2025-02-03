@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://5kevopkrq8ts"]
+
+[ext_resource type="PackedScene" uid="uid://blcglpbttoi64" path="res://scenes/units/unit.tscn" id="1_1dy7s"]
+[ext_resource type="Script" path="res://scripts/entities/units/anima.gd" id="2_d7eqb"]
+[ext_resource type="Texture2D" uid="uid://cdhuq0qhbt6qo" path="res://assets/animaSheet.png" id="2_q7nwj"]
+
+[node name="Unit" instance=ExtResource("1_1dy7s")]
+script = ExtResource("2_d7eqb")
+SPEED = 0.125
+AGGRO_RANGE = 5.0
+
+[node name="Sprite" parent="." index="2"]
+transform = Transform3D(5, 0, 0, 0, 3.53553, -3.53553, 0, 3.53553, 3.53553, 0, 0, 0)
+offset = Vector2(0, 4)
+texture = ExtResource("2_q7nwj")
+hframes = 6
+vframes = 5
+frame = 1

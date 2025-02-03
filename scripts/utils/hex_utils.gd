@@ -22,7 +22,7 @@ static func cube_round(cube_coordinates: Vector3) -> Vector3i:
 @warning_ignore("integer_division")
 static func cube_to_evenq(cube_coordinates: Vector3i) -> Vector2i:
 	var col = cube_coordinates.x
-	var row = cube_coordinates.z + (cube_coordinates.x + (cube_coordinates.x&1)) / 2
+	var row = cube_coordinates.z + (cube_coordinates.x - (cube_coordinates.x&1)) / 2
 	return Vector2i(col, row)
 
 static func world_to_evenq_hex(point: Vector2) -> Vector2i:

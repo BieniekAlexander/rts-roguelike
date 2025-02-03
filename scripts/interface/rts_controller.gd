@@ -4,10 +4,12 @@ class_name RTSController extends Node3D
 @export var camera: Camera3D
 
 ## CONTROL VARIABLES
-@onready var next_command_type: Command.TYPE = Command.TYPE.MOVE
+@onready var next_command_type = null
 @onready var next_command_additive: bool = false
 var mouse_position: Vector2 = Vector2.ZERO
 var select_down_position: Vector2 = Vector2.ZERO
+var selected_unit_types: Set = Set.new()
+var active_command_context: Variant = CommandContext.NULL
 
 ## GAMESTATE
 @onready var map: HexGrid = get_tree().current_scene.find_child("Map")
@@ -18,17 +20,14 @@ func _ready():
 	selection_box.visible = false
 	if !selection_box.is_inside_tree():
 		add_child(selection_box)
+		
+func _process(delta: float) -> void:
+	# fog of war stuff
+	pass
 
 func _input(event: InputEvent):
-	## COMMAND STATE MODIFIERS
-	if event.is_action_pressed("command_state_additive"):
-		next_command_additive = true
-	elif event.is_action_released("command_state_additive"):
-		next_command_additive = false	
-	elif event.is_action_pressed("command_state_attack_move"):
-		next_command_type = Command.TYPE.ATTACK_MOVE
 	## MOUSE MOVEMENT
-	elif event is InputEventMouseMotion:
+	if event is InputEventMouseMotion:
 		mouse_position = event.position
 		if selection_box.visible == true:
 			var selection_box_size = abs(mouse_position - select_down_position)
@@ -50,6 +49,29 @@ func _input(event: InputEvent):
 		selection_box.visible = false
 		if !next_command_additive: deselect()
 		set_selection(select_down_position, mouse_position)
+	## QUEUING
+	elif event.is_action_pressed("command_additive"):
+		next_command_additive = true
+	elif event.is_action_released("command_additive"):
+		next_command_additive = false
+	## COMMAND STATE MODIFIERS
+	# TODO cleanup mapping of event to action - Godot does not make this easy
+	elif get_action_names_from_event(event).size()>0:
+		var action_name = get_action_names_from_event(event)[0]
+		var next = active_command_context.get_new_context(action_name)
+		
+		
+		if next is CommandContext:
+			active_command_context = next
+		elif next==Command or next.get_base_script()==Command:
+			next_command_type = next
+			# TODO find a better way to make this check
+			if !next.requires_position():
+				assign_command_to_units(
+					Vector3.ZERO,
+					next_command_type,
+					next_command_additive
+				)
 	# ISSUING COMMANDS
 	elif event.is_action_pressed("command_move"):
 		assign_command_to_units(
@@ -58,30 +80,29 @@ func _input(event: InputEvent):
 			next_command_additive
 		)
 	elif event.is_action_pressed("command_stop"):
-		assign_command_to_units(
-			map.get_mouse_world_position(mouse_position),
-			Command.TYPE.STOP,
-			false
-		)
+		cancel_command_for_units()
+		set_active_command_context(selection)
 
 func set_selection(selection_start_position: Vector2, selection_end_position: Vector2):
 	var drag_distance = abs(selection_start_position - selection_end_position)
 	if drag_distance < Vector2(10, 10):
-		set_selected_unit()
+		set_selected_unit(selection_start_position)
 	else:
 		set_selected_units()
-		
-func set_selected_unit():
+
+func set_selected_unit(position: Vector2):
 	# TODO select the unit with something different from get_obstruction
 	# that method checks for a collider, but the sprite is generally bigger in screen space than the collider,
 	# and I probably want to check for sprite collision
-	var hex_coorinate: Vector2 = VU.inXZ(map.get_mouse_world_position(mouse_position))
-	var unit: Commandable = map.get_commmandable_at_position(hex_coorinate)
+	var hex_coorinate: Vector2 = VU.inXZ(map.get_mouse_world_position(position))
+	var entity: Entity = map.get_entity_at_position(hex_coorinate)
 	
-	if unit != null:
-		selection.append(unit)
-		unit.set_selected()
+	if entity != null and entity is Commandable:
+		selection.append(entity)
+		entity.set_selected()
 	
+	set_active_command_context(selection)
+
 func set_selected_units():
 	var selection_box_geometry: PackedVector2Array = [
 		selection_box.position,
@@ -90,50 +111,80 @@ func set_selected_units():
 		selection_box.position + Vector2(0.0, selection_box.size.y)
 	]
 	
-	for unit: Commandable in get_tree().get_nodes_in_group("commandable"):
-		var selected_screen_position = camera.unproject_position(unit.global_position)
+	for c: Commandable in get_tree().get_nodes_in_group("commandable"):
+		# TODO collect units from spatial partitioning
+		var selected_screen_position = camera.unproject_position(c.global_position)
 		if Geometry2D.is_point_in_polygon(selected_screen_position, selection_box_geometry):
-			selection.append(unit)
-			unit.set_selected()
+			selection.append(c)
+			c.set_selected()
+	
+	set_active_command_context(selection)
 
+func set_active_command_context(a_commandables: Array) -> void:
+	selected_unit_types.clear()
+	
+	for c: Commandable in a_commandables:
+		selected_unit_types.add(c.get_script())
+	
+	active_command_context = selected_unit_types.map(
+		func(t): return t.get_command_context()
+	).reduce(
+		func(a, b): return CommandContext.merge(a, b),
+		CommandContext.NULL
+	)
+
+func cancel_command_for_units() -> void:
+	var selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
+	
+	if selection.size()==0:
+		return
+		
+	for c: Commandable in selection:
+		c.update_commands(
+			null,
+			false
+		)
 
 func assign_command_to_units(
 	world_position: Vector3,
-	a_command_type: Command.TYPE,
+	a_command_type,
 	add_to_queue: bool
 ) -> void:
-	var active_selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
+	var selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
 	
-	if active_selection.size()==0:
+	if selection.size()==0:
 		return
-	else:
-		var targeted_commandable = map.get_commmandable_at_position(VU.inXZ(world_position))
-		
-		if targeted_commandable!=null:
-			print("attacking %s" % targeted_commandable)
-			for unit: Unit in active_selection:
-				unit.set_command(
-					Command.new(
-						targeted_commandable,
-						Command.TYPE.MOVE
-					),
-					add_to_queue
-				)
-		else:
-			for unit: Unit in active_selection:
-				unit.set_command(
-					Command.new(
-						VU.onXZ(world_position),
-						a_command_type
-					),
-					add_to_queue
-				)
-		
-		if !add_to_queue:
-			next_command_type = Command.TYPE.MOVE
+	
+	var targeted_entity = map.get_entity_at_position(VU.inXZ(world_position))
+	if targeted_entity == null:
+		targeted_entity = VU.onXZ(world_position)
+	
+	if a_command_type==null:
+		a_command_type = selection[0].get_default_interaction_command_type(targeted_entity)
+	
+	var new_command: Command = a_command_type.new(targeted_entity)
+	
+	for c: Commandable in selection:
+		if c.get_script().get_command_context().commands.has(a_command_type):
+			c.update_commands(
+				new_command,
+				add_to_queue
+			)
+	
+	if !add_to_queue:
+		next_command_type = null
+		set_active_command_context(selection)
 
 func deselect():
-	for c: Commandable in selection:
+	for c in selection:
 		if is_instance_valid(c):
 			c.set_deselected()
 	selection = []
+	selected_unit_types = Set.new()
+
+static func get_action_names_from_event(event: InputEvent) -> Array:
+	return InputMap.get_actions().filter(
+		func(action): return "command_state" in action
+	).filter(
+		func(action): return event.is_action_pressed(action, true)
+	)

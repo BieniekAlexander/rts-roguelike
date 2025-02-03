@@ -1,0 +1,69 @@
+class_name Entity
+extends CharacterBody3D
+
+
+### IDENTIFIERS
+var _commander: Commander
+var commander: Commander:
+	get: return _commander
+	set(value):
+		_commander = value
+		$Sprite.modulate = TEAM_COLOR_MAP.get(commander_id)
+var commander_id: int:
+	get: return _commander.id
+const TEAM_COLOR_MAP: Dictionary = {
+	0: Color.WHITE,
+	1: Color.WEB_GREEN,
+	2: Color.RED,
+	3: Color.AQUA,
+	4: Color.YELLOW
+}
+
+
+### COLLISION
+var map: HexGrid
+var pc_set: Set = Set.new()
+@onready var collider: CollisionShape3D = $Collider
+@onready var spatial_partition_dirty: bool = false
+
+func get_collision_extents() -> Array[Vector2]:
+	var collider_radius
+	match typeof(collider.shape):
+		SphereShape3D: collider_radius = collider.shape.radius
+		BoxShape3D: collider_radius = collider.shape.size.x*sqrt(2)
+		ConcavePolygonShape3D:  collider_radius = 1
+		_: collider_radius = 1
+	
+	return [
+		VU.inXZ(global_position),
+		VU.inXZ(global_position)+Vector2.UP*collider_radius,
+		VU.inXZ(global_position)+Vector2.DOWN*collider_radius,
+		VU.inXZ(global_position)+Vector2.LEFT*collider_radius,
+		VU.inXZ(global_position)+Vector2.RIGHT*collider_radius
+	]
+
+var collision_radius: float:
+	get:
+		var shape = collider.shape
+		if shape is SphereShape3D: return shape.radius
+		elif shape is BoxShape3D: return max(shape.size.x, shape.size.z)
+		else:
+			assert(false, "unhandled collider type %s" % typeof(shape))
+			return -1.0
+
+
+### NODE
+func _ready() -> void:
+	add_to_group("entity")
+
+func initialize(a_map: HexGrid, a_commander: Commander, a_position: Vector3):
+	map = a_map
+	commander = a_commander
+	map.add_child(self)
+	global_position = a_position
+
+func _on_death() -> void:
+	for coords: Vector2i in pc_set.get_values():
+		map.spatial_partition_grid[coords.x][coords.y].remove(self)
+	
+	queue_free()

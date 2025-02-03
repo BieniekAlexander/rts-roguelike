@@ -1,27 +1,33 @@
 class_name HexCell
 extends Node3D
 
+### SPATIAL
+var map: HexGrid
 @onready var tile: Sprite3D = $Tile
-var structure: Node
 var index: Vector2i
+const TILE_SIZE: float = 1.5
+
+
+### COMMANDABLES
+var structure: Node
 var commandables: Set
+
+func create_structure(commander: Commander, rebake_navmesh: bool = false) -> Structure:
+	var s: Structure = load("res://scenes/structures/structure.tscn").instantiate()
+	s.initialize(map, commander, global_position)
+	add_child(s)
 	
-const TILE_SIZE: float = 1
-const structure_scene: PackedScene = preload("res://scenes/structure.tscn")
+	if rebake_navmesh:
+		map.navmesh.bake_navigation_mesh()
 	
-func init(_index: Vector2i) -> void:
-	index = _index
+	return s
+
+
+### NODE
+func _ready() -> void:
+	scale = TILE_SIZE*.72*Vector3.ONE
 	commandables = Set.new()
-	var frame = 5 if (index.y*index.x)%8>3 else 0
-	if frame==5:
-		structure = structure_scene.instantiate()
-		add_child(structure)
 
-func add_unit(c: Commandable) -> void:
-	commandables.add(c)
-
-func remove_unit(c: Commandable) -> void:
-	if commandables.contains(c):
-		commandables.remove(c)
-	else:
-		push_error("The following unit was not found in this cell: %s" % c)
+func init(a_index: Vector2i, a_map: HexGrid) -> void:
+	index = a_index
+	map = a_map

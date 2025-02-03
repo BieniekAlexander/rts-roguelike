@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://d372d5stwv6gt"]
+
+[ext_resource type="PackedScene" uid="uid://bnic4wpl31scb" path="res://scenes/structures/structure.tscn" id="1_qpx6v"]
+[ext_resource type="Script" path="res://scripts/entities/structures/well.gd" id="2_a4hhe"]
+
+[node name="Structure" instance=ExtResource("1_qpx6v")]
+script = ExtResource("2_a4hhe")
+
+[node name="Sprite" parent="." index="1"]
+transform = Transform3D(7.34, 0, 0, 0, 1, 0, 0, 0, 6.902, 0, 0, 0)

@@ -34,19 +34,29 @@ func clear()  -> Set:
 
 ## LIST COMPREHENSION
 func filter(condition: Callable) -> Set:
+	var new_hash_set: Dictionary = {}
+	
 	for element in hash_set.keys():
-		if !condition.call(element):
-			remove(element)
+		if condition.call(element):
+			new_hash_set[element] = DUMMY_VALUE
 	
-	return self
-	
+	return Set.new(new_hash_set.keys())
+
 func map(function: Callable) -> Set:
 	var new_hash_set: Dictionary = {}
 	for element in hash_set.keys():
 		new_hash_set[function.call(element)] = DUMMY_VALUE
 	
-	hash_set = new_hash_set
-	return self
+	return Set.new(new_hash_set.keys())
+
+func reduce(function: Callable, default: Variant) -> Variant:
+	if hash_set.size()==0: return default
+	
+	var result: Variant = hash_set.keys()[0]
+	for val in hash_set.keys().slice(1):
+		result = function.call(result, val)
+	
+	return result
 
 
 ## MEMBERSHIP
@@ -62,8 +72,7 @@ func is_empty() -> bool:
 	return hash_set.is_empty()
 
 func size() -> int:
-	return hash_set.size()
-
+	return hash_set.keys().size()
 
 ## ARITHMETIC
 func union(other_set: Set) -> Set:

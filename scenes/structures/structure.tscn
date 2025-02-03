@@ -1,0 +1,102 @@
+[gd_scene load_steps=13 format=3 uid="uid://bnic4wpl31scb"]
+
+[ext_resource type="Script" path="res://scripts/entities/structures/structure.gd" id="1_37vmy"]
+[ext_resource type="Texture2D" uid="uid://cgdrbpxqo62uf" path="res://assets/structure.png" id="2_ixuya"]
+[ext_resource type="Texture2D" uid="uid://bojbrs2dpggcv" path="res://assets/selection.png" id="3_l6d3i"]
+
+[sub_resource type="Gradient" id="Gradient_ulv2o"]
+offsets = PackedFloat32Array(0)
+colors = PackedColorArray(0, 0, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_4y8y4"]
+gradient = SubResource("Gradient_ulv2o")
+
+[sub_resource type="Gradient" id="Gradient_4hdu4"]
+offsets = PackedFloat32Array(1)
+colors = PackedColorArray(1, 0, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_u6dgv"]
+gradient = SubResource("Gradient_4hdu4")
+
+[sub_resource type="Gradient" id="Gradient_jsf3v"]
+offsets = PackedFloat32Array(0)
+colors = PackedColorArray(0, 0, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_1klos"]
+gradient = SubResource("Gradient_jsf3v")
+
+[sub_resource type="Gradient" id="Gradient_cdjbw"]
+offsets = PackedFloat32Array(1)
+colors = PackedColorArray(0.8, 0.666667, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_3u132"]
+gradient = SubResource("Gradient_cdjbw")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4vk4e"]
+size = Vector3(0.8, 1, 1.6)
+
+[node name="Structure" type="CharacterBody3D" groups=["commandable"]]
+script = ExtResource("1_37vmy")
+
+[node name="NavigationObstacle3D" type="NavigationObstacle3D" parent="."]
+height = 10.0
+vertices = PackedVector3Array(1.35, 0, 0, 0.7, 1, 1.2, -0.7, 0, 1.2, -1.35, 0, 0, -0.7, 0, -1.2, 0.7, 0, -1.2)
+affect_navigation_mesh = true
+
+[node name="Sprite" type="Sprite3D" parent="."]
+transform = Transform3D(7.33997, 0, 0, 0, 1, 0, 0, 0, 6.90188, 0, 0, 0)
+axis = 1
+render_priority = 1
+texture = ExtResource("2_ixuya")
+
+[node name="HPBar" type="Node3D" parent="."]
+transform = Transform3D(0.3, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0.1, -0.2)
+visible = false
+
+[node name="HPBarBack" type="Sprite3D" parent="HPBar"]
+render_priority = 8
+texture = SubResource("GradientTexture1D_4y8y4")
+region_enabled = true
+region_rect = Rect2(2, 0, 0, 0)
+
+[node name="HPBarFill" type="Sprite3D" parent="HPBar"]
+render_priority = 5
+texture = SubResource("GradientTexture1D_u6dgv")
+
+[node name="TrainBar" type="Sprite3D" parent="."]
+transform = Transform3D(0.333, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0.25, -0.2)
+visible = false
+pixel_size = 0.0001
+render_priority = 8
+texture = SubResource("GradientTexture1D_1klos")
+region_enabled = true
+region_rect = Rect2(2, 0, 0, 0)
+
+[node name="TrainBarFill" type="Sprite3D" parent="TrainBar"]
+render_priority = 5
+texture = SubResource("GradientTexture1D_3u132")
+
+[node name="SelectionIndicator" type="Sprite3D" parent="."]
+transform = Transform3D(0.25, 0, 0, 0, 0.176777, 0.176777, 0, -0.176777, 0.176777, 0, 0, 0)
+visible = false
+texture = ExtResource("3_l6d3i")
+
+[node name="ShotParticles" type="GPUParticles3D" parent="."]
+visible = false
+
+[node name="Collider" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_4vk4e")
+
+[node name="Body" type="StaticBody3D" parent="."]
+
+[node name="Collider" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+shape = SubResource("BoxShape3D_4vk4e")
+
+[node name="Collider2" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(0.75, 0, 1.29904, 0, 1.5, 0, -1.29904, 0, 0.75, 0, 0, 0)
+shape = SubResource("BoxShape3D_4vk4e")
+
+[node name="Collider3" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(0.75, 0, -1.29904, 0, 1.5, 0, 1.29904, 0, 0.75, 0, 0, 0)
+shape = SubResource("BoxShape3D_4vk4e")

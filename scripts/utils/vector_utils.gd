@@ -11,3 +11,7 @@ static func fromXZ(v: Vector2) -> Vector3:
 
 static func l1Norm(v: Vector2) -> float:
 	return abs(v.x) + abs(v.y)
+
+static func range(v: Vector2) -> int:
+	assert(v.x<=v.y, "first component was larger than second component, so range undefined for vector %s" % v)
+	return (v.y-v.x)
