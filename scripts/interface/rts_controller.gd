@@ -12,7 +12,7 @@ var selected_unit_types: Set = Set.new()
 var active_command_context: Variant = CommandContext.NULL
 
 ## GAMESTATE
-@onready var map: HexGrid = get_tree().current_scene.find_child("Map")
+@onready var map: Map = get_tree().current_scene.find_child("Map")
 var selection: Array[Node] = []
 
 ## NODE

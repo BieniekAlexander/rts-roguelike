@@ -69,7 +69,6 @@ func get_aggro_near_position(a_position: Vector2, a_range: float) -> Command:
 
 ### VISUALS
 @onready var hpBarFill: Sprite3D = $HPBar/HPBarFill
-@onready var shotParticles: GPUParticles3D = $ShotParticles
 var SHOT_DURATION: int = 2
 
 func _process(delta: float) -> void:
@@ -80,6 +79,8 @@ func _process(delta: float) -> void:
 		hpBarFill.position.x = -scale.x * (1-hpBarFill.scale.x)
 	
 	if ATTACK_RANGE>0:
+		# TODO refactor particles
+		var shotParticles: GPUParticles3D = $ShotParticles
 		shotParticles.emitting = attack_timer>0
 		
 	if $SelectionIndicator.visible and Input.is_key_pressed(KEY_BACKSLASH):

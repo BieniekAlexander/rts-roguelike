@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://brswqxlmk24kk"]
 
-[ext_resource type="Script" path="res://scripts/hex_grid.gd" id="1_faupn"]
+[ext_resource type="Script" path="res://scripts/maps/map.gd" id="1_faupn"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_kpdvm"]
 vertices = PackedVector3Array(-19.75, 1, -19.75, -19.75, 1, 19.75, 19.75, 1, 19.75, 19.75, 1, -19.75)
@@ -8,7 +8,7 @@ polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
 geometry_parsed_geometry_type = 1
 agent_height = 1.0
 agent_radius = 0.25
-agent_max_climb = 0.0
+agent_max_climb = 0.6
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7vqeb"]
 size = Vector3(1, 1, 20)
@@ -21,12 +21,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0117779, 0.0282087, 0.03538
 navigation_mesh = SubResource("NavigationMesh_kpdvm")
 navigation_layers = 3
 
-[node name="Floor" type="StaticBody3D" parent="NavigationRegion"]
+[node name="NavigationObstacle3D" type="NavigationObstacle3D" parent="NavigationRegion"]
+vertices = PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0117779, 0.0282087, 0.0353899)
 collision_layer = 2
 collision_mask = 0
 
-[node name="Collider" type="CollisionShape3D" parent="NavigationRegion/Floor"]
+[node name="Collider" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("BoxShape3D_7vqeb")
-
-[node name="NavigationObstacle3D" type="NavigationObstacle3D" parent="NavigationRegion"]
-vertices = PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0)

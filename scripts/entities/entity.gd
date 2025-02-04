@@ -21,7 +21,7 @@ const TEAM_COLOR_MAP: Dictionary = {
 
 
 ### COLLISION
-var map: HexGrid
+var map: Map
 var pc_set: Set = Set.new()
 @onready var collider: CollisionShape3D = $Collider
 @onready var spatial_partition_dirty: bool = false
@@ -44,6 +44,9 @@ func get_collision_extents() -> Array[Vector2]:
 
 var collision_radius: float:
 	get:
+		# TODO remove this stupid Structure check
+		# I have to revisit Structure colliders
+		if self is Structure: return 0
 		var shape = collider.shape
 		if shape is SphereShape3D: return shape.radius
 		elif shape is BoxShape3D: return max(shape.size.x, shape.size.z)
@@ -56,7 +59,7 @@ var collision_radius: float:
 func _ready() -> void:
 	add_to_group("entity")
 
-func initialize(a_map: HexGrid, a_commander: Commander, a_position: Vector3):
+func initialize(a_map: Map, a_commander: Commander, a_position: Vector3):
 	map = a_map
 	commander = a_commander
 	map.add_child(self)

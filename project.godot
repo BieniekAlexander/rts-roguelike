@@ -16,7 +16,7 @@ config/features=PackedStringArray("4.3", "Forward Plus")
 
 [display]
 
-window/size/mode=3
+window/size/mode=4
 window/size/initial_position_type=0
 
 [editor_plugins]

@@ -24,3 +24,8 @@ res://scripts/entities/structures/core.gd
 res://scripts/entities/structures/structure.gd
 res://scripts/commands/build.gd
 res://scripts/entities/structures/well.gd
+res://scenes/hex_cell.tscn
+res://scripts/hex_cell.gd
+res://scripts/entities/entity.gd
+res://scripts/maps/map.gd
+res://scripts/maps/hex_cell.gd

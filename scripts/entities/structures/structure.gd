@@ -40,7 +40,7 @@ func _process(delta: float) -> void:
 		$TrainBar/TrainBarFill.scale.x = float(training_queue[0])/450 # TODO remove hardcode, sooo lazy
 		$TrainBar/TrainBarFill.position.x = -scale.x * (1-$TrainBar/TrainBarFill.scale.x)
 
-func initialize(a_map: HexGrid, a_commander: Commander, a_position: Vector3):
+func initialize(a_map: Map, a_commander: Commander, a_position: Vector3):
 	super(a_map, a_commander, a_position)
 	commander.terra += terra_amount
 

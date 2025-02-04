@@ -2,10 +2,10 @@
 
 [ext_resource type="PackedScene" uid="uid://brswqxlmk24kk" path="res://scenes/map.tscn" id="1_5ojvs"]
 [ext_resource type="Script" path="res://scripts/interface/rts_camera_3d.gd" id="2_2nk8l"]
-[ext_resource type="Script" path="res://scripts/commander.gd" id="2_wosgy"]
+[ext_resource type="Script" path="res://scripts/interface/commander.gd" id="2_wosgy"]
 [ext_resource type="Script" path="res://scripts/interface/rts_controller.gd" id="3_y7scq"]
 [ext_resource type="Shader" path="res://shaders/fog.gdshader" id="4_5j8ft"]
-[ext_resource type="Script" path="res://scripts/fog.gd" id="5_1qyxm"]
+[ext_resource type="Script" path="res://scripts/maps/fog.gd" id="5_1qyxm"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_abny7"]
 render_priority = 100

@@ -1,4 +1,4 @@
-class_name HexGrid
+class_name Map
 extends Node
 
 
@@ -21,7 +21,6 @@ const HEIGHT = WIDTH * sqrt(3)/2.0
 @export var Y_RANGE: Vector2i = Vector2i(-8, 8)
 
 @onready var navmesh: NavigationRegion3D = $NavigationRegion
-@onready var floor_collider: CollisionShape3D = $NavigationRegion/Floor/Collider
 @onready var SPACE_PARTITION_CELL_RADIUS: float = 5.
 var spatial_partition_grid: Array
 
@@ -131,9 +130,8 @@ func _init_grid() -> void:
 			navmesh.add_child(hex_cell)
 			
 			hex_cell.position = Vector3(x*HORIZ, 0, (y+((x&1)/2.0))*HEIGHT)
-			
-	floor_collider.shape.size.x = HORIZ*(X_RANGE.y-X_RANGE.x)
-	floor_collider.shape.size.z = HEIGHT*(Y_RANGE.y-Y_RANGE.x)
+	
+	evenq_grid[-3][0].global_position.y = .5
 	
 func _load_commandables():
 	var text = FileAccess.open("res://map_stuff.json", FileAccess.READ).get_as_text()
