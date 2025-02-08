@@ -80,6 +80,7 @@ texture = ExtResource("3_uy385")
 
 [node name="ShotParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+visible = false
 emitting = false
 amount = 5
 process_material = SubResource("ParticleProcessMaterial_0ldvb")

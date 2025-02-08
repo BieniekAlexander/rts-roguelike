@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://scripts/interface/rts_camera_3d.gd" id="2_2nk8l"]
 [ext_resource type="Script" path="res://scripts/interface/commander.gd" id="2_wosgy"]
 [ext_resource type="Script" path="res://scripts/interface/rts_controller.gd" id="3_y7scq"]
-[ext_resource type="Shader" path="res://shaders/fog.gdshader" id="4_5j8ft"]
+[ext_resource type="Shader" path="res://scripts/shaders/fog.gdshader" id="4_5j8ft"]
 [ext_resource type="Script" path="res://scripts/maps/fog.gd" id="5_1qyxm"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_abny7"]
@@ -25,57 +25,60 @@ subdivide_depth = 1
 
 [node name="Map" parent="." instance=ExtResource("1_5ojvs")]
 
-[node name="Fog" type="MeshInstance3D" parent="."]
-transform = Transform3D(50, 0.000558574, -0.0223587, -0.0279303, 1, -0.00296635, 0.0248412, 6.61965e-05, 45, 0, 0, 0)
-sorting_offset = 10000.0
-mesh = SubResource("PlaneMesh_43jbe")
-skin = SubResource("Skin_b7e7i")
-skeleton = NodePath("")
-script = ExtResource("5_1qyxm")
+[node name="Players" type="Node" parent="Map"]
 
-[node name="Players" type="Node" parent="."]
-
-[node name="Gaia" type="Control" parent="Players"]
+[node name="Gaia" type="Control" parent="Map/Players"]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("2_wosgy")
 
-[node name="Player" type="Control" parent="Players"]
+[node name="Player" type="Control" parent="Map/Players"]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("2_wosgy")
 id = 1
 
-[node name="Camera" type="Camera3D" parent="Players/Player"]
+[node name="Camera" type="Camera3D" parent="Map/Players/Player"]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 14.229, 5)
 projection = 1
 size = 20.0
 far = 500.0
 script = ExtResource("2_2nk8l")
 
-[node name="Controller" type="Node3D" parent="Players/Player" node_paths=PackedStringArray("selection_box", "camera")]
+[node name="Controller" type="Node3D" parent="Map/Players/Player" node_paths=PackedStringArray("selection_box", "camera")]
 transform = Transform3D(3.58671, 0, 0, 0, 3.58671, 0, 0, 0, 3.58671, 0, 0, 0)
 script = ExtResource("3_y7scq")
 selection_box = NodePath("SelectionBox")
 camera = NodePath("../Camera")
 
-[node name="SelectionBox" type="ColorRect" parent="Players/Player/Controller"]
-visible = false
+[node name="SelectionBox" type="ColorRect" parent="Map/Players/Player/Controller"]
 offset_right = 40.0
 offset_bottom = 40.0
 color = Color(0.654902, 0.137255, 0.972549, 0.498039)
 
-[node name="ResourceSummaryLabel" type="RichTextLabel" parent="Players/Player"]
+[node name="ResourceSummaryLabel" type="RichTextLabel" parent="Map/Players/Player"]
 layout_mode = 0
 offset_right = 260.0
 offset_bottom = 85.0
+text = "	aqua: 12420
+	terra: 100
+	ignis: 10"
 
-[node name="CPU" type="Control" parent="Players"]
+[node name="CPU" type="Control" parent="Map/Players"]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("2_wosgy")
 id = 2
+
+[node name="Fog" type="MeshInstance3D" parent="Map"]
+transform = Transform3D(50.0093, 0.000558588, -0.0307468, -0.0279355, 1.00002, -0.00407921, 0.0248458, 6.61981e-05, 61.8822, 17.9923, 0, 24.1427)
+visible = false
+sorting_offset = 10000.0
+mesh = SubResource("PlaneMesh_43jbe")
+skin = SubResource("Skin_b7e7i")
+skeleton = NodePath("")
+script = ExtResource("5_1qyxm")

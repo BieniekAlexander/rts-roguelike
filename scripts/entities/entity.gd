@@ -1,3 +1,4 @@
+@tool
 class_name Entity
 extends CharacterBody3D
 
@@ -13,10 +14,10 @@ var commander_id: int:
 	get: return _commander.id
 const TEAM_COLOR_MAP: Dictionary = {
 	0: Color.WHITE,
-	1: Color.WEB_GREEN,
-	2: Color.RED,
-	3: Color.AQUA,
-	4: Color.YELLOW
+	1: Color.AQUA,
+	2: Color.YELLOW,
+	3: Color.WEB_GREEN,
+	4: Color.RED
 }
 
 
@@ -46,7 +47,7 @@ var collision_radius: float:
 	get:
 		# TODO remove this stupid Structure check
 		# I have to revisit Structure colliders
-		if self is Structure: return 0
+		if self is Structure: return 1
 		var shape = collider.shape
 		if shape is SphereShape3D: return shape.radius
 		elif shape is BoxShape3D: return max(shape.size.x, shape.size.z)

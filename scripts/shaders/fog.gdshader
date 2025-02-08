@@ -16,17 +16,17 @@ void vertex() {
 void fragment() {
 	ALBEDO.xyz = vec3(0., 0., 0.);
 	ALPHA = texture(fog_texture, texture_position).b;
-	
-	
+
+
 	//if (texture(fog_texture, vertex_world_pos.xz).r!=0.) {
 		//ALPHA = texture(fog_texture, vertex_world_pos.xz).r;
 	//}
-	
+
 	//for (int i = 0; i < pos.length(); i++) {
 		//if (distance(pos[i], VERTEX.xz)<1.) {
 			//ALPHA = 0.;
 			//break;
-		//}	
+		//}
 	//}
 }
 

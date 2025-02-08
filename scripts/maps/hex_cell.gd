@@ -1,3 +1,4 @@
+@tool
 class_name HexCell
 extends Node3D
 

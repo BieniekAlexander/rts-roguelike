@@ -1,3 +1,4 @@
+@tool
 class_name Structure
 extends Commandable
 
@@ -29,7 +30,6 @@ func _update_state() -> void:
 	if _command!=null and _command.get_script()==Command:
 		rally_command = _command
 		_command = null
-		print("setting rallypoint")
 
 func _process(delta: float) -> void:
 	super(delta)

@@ -1,3 +1,4 @@
+@tool
 class_name Commandable
 extends Entity
 
@@ -54,7 +55,10 @@ enum Disposition {
 func get_aggro_near_position(a_position: Vector2, a_range: float) -> Command:
 	var entities = map.get_entities_in_range(a_position, a_range)
 	var commandables = entities.filter(func(e: Entity): return e is Commandable)
-	commandables = AU.sort_on_key(commandables, func(e: Entity): return a_position.distance_squared_to(VU.inXZ(e.global_position)))
+	commandables = AU.sort_on_key(
+		func(e: Entity): return a_position.distance_squared_to(VU.inXZ(e.global_position)),
+		commandables
+	)
 	
 	for c: Commandable in commandables:
 		if (
@@ -170,4 +174,5 @@ func get_default_interaction_command_type(target):
 	if target is Commandable or target is Vector3:
 		return Command
 	else:
+		return null
 		push_error("Undefined interaction between this type and %s" % target)

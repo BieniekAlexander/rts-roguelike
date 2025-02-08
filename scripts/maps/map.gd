@@ -1,3 +1,4 @@
+@tool
 class_name Map
 extends Node
 
@@ -6,20 +7,49 @@ extends Node
 @onready var camera: RTSCamera3D = get_viewport().get_camera_3d()
 
 
+### SCENARIO CONFIG
+var frame: int = 0
+@onready var grid_config: Array = FU.get_data_from_csv_file("res://configs/scenarios/scenario1/grid.csv")
+@onready var init_event_config: Dictionary = FU.get_data_from_json_file("res://configs/scenarios/scenario1/init.json")
+@onready var event_queue: Array = AU.sort_on_key(
+	func(e): return e["timer"],
+	FU.get_data_from_json_file("res://configs/scenarios/scenario1/events.json").map(
+		func(e): return EventUtils.render_event_config(e, 0)
+	)
+)
+
+
+func process_events_from_queue() -> void:
+	var i: int = 0
+	
+	while i<event_queue.size():
+		var current_event = event_queue[i]
+		
+		if current_event["timer"] == frame:
+			EventUtils.load_entities_from_event(current_event, self)
+			var updated_event = EventUtils.render_event_config(current_event, frame)
+			event_queue.remove_at(i)
+			
+			if updated_event != null:
+				AU.priority_queue_push(func(e): return e["timer"], current_event, event_queue)
+		elif current_event["timer"] > frame:
+			return
+		else:
+			i+=1
+
+
 ### SPACE THINGS
 #### STRUCTURE HEX GRID
+var active_entities: Array[Entity] = []
 var evenq_grid: Dictionary = {}
 var hex_cell_scene: PackedScene = load("res://scenes/hex_cell.tscn")
 const structure_scene: PackedScene = preload("res://scenes/structures/well.tscn")
-const WIDTH = HexCell.TILE_SIZE*2.0
-const HORIZ = WIDTH * .75
-const HEIGHT = WIDTH * sqrt(3)/2.0
+const TILE_WIDTH = HexCell.TILE_SIZE*2.0
+const TILE_HORIZ = TILE_WIDTH * .75
+const TILE_HEIGHT = TILE_WIDTH * sqrt(3)/2.0
 
 
 #### UNIT LOCATION AND NAVIGATION
-@export var X_RANGE: Vector2i = Vector2i(-10, 10)
-@export var Y_RANGE: Vector2i = Vector2i(-8, 8)
-
 @onready var navmesh: NavigationRegion3D = $NavigationRegion
 @onready var SPACE_PARTITION_CELL_RADIUS: float = 5.
 var spatial_partition_grid: Array
@@ -35,8 +65,8 @@ func get_map_hex_cell(point: Vector2) -> HexCell:
 	
 func get_map_spatial_partition_index(point: Vector2) -> Vector2i:
 	return Vector2i(
-		floori((point.x+VU.range(X_RANGE)*HORIZ/2)/SPACE_PARTITION_CELL_RADIUS),
-		floori((point.y+VU.range(Y_RANGE)*HEIGHT/2)/SPACE_PARTITION_CELL_RADIUS)
+		floori((point.x)/SPACE_PARTITION_CELL_RADIUS),
+		floori((point.y)/SPACE_PARTITION_CELL_RADIUS)
 	)
 
 func get_entities_in_range(xz_position: Vector2, radius: float) -> Array:
@@ -66,6 +96,7 @@ func reassign_unit_in_spatial_partition(a_entity: Entity) -> void:
 		a_entity.collision_radius
 	)
 	
+	assert(partition_coordinates_set.size()>0, "Entity is nowhere in spatial partitioning")
 	var new_coords_set: Set = partition_coordinates_set.difference(a_entity.pc_set)
 	var old_coords_set: Set = a_entity.pc_set.difference(partition_coordinates_set)
 	
@@ -74,7 +105,7 @@ func reassign_unit_in_spatial_partition(a_entity: Entity) -> void:
 		
 	for partition_coords: Vector2i in new_coords_set.get_values():
 		spatial_partition_grid[partition_coords.x][partition_coords.y].add(a_entity)
-		
+	
 	a_entity.pc_set = partition_coordinates_set
 
 func reassign_entities_in_spatial_partition(force: bool = false) -> void:
@@ -86,7 +117,7 @@ func reassign_entities_in_spatial_partition(force: bool = false) -> void:
 
 func get_entities_at_spatial_partition(partition_index: Vector2i) -> Set:
 	return spatial_partition_grid[partition_index.x][partition_index.y]
-	
+
 func get_entities_near_point(xz_position: Vector2) -> Set:
 	## Returns units "near" the indicated point, as interpreted from the spatial partitioning
 	return get_entities_at_spatial_partition(
@@ -115,66 +146,62 @@ func get_entity_at_position(xz_position: Vector2) -> Entity:
 		if CU.point_in_collider_2d(xz_position, e.collider):
 			print("right-clicked %s" % e)
 			return e
-			
+	
 	return null
 
 
 ### NODE
-func _init_grid() -> void:
-	for x in range(X_RANGE.x, X_RANGE.y):
-		evenq_grid[x] = {}
-		for y in range(Y_RANGE.x, Y_RANGE.y):
+func _init_grid(grid_config: Array) -> Dictionary:
+	var grid_height: int = grid_config[0].size()
+	var grid_width: int = grid_config.size() if grid_config[-1].size()!=0 else grid_config.size()-1
+	var new_grid = {}
+	
+	for x in range(grid_width):
+		new_grid[x] = {}
+		for y in range(grid_height):
+			var cell_spec: String = grid_config[x][y]
+			var cell_height = float(cell_spec[0])*.5-2.5 # NOTE: hardcoded height relationship, but it's ok
 			var hex_cell: HexCell = hex_cell_scene.instantiate()
 			hex_cell.init(Vector2i(x, y), self)
-			evenq_grid[x][y] = hex_cell
+			new_grid[x][y] = hex_cell
 			navmesh.add_child(hex_cell)
 			
-			hex_cell.position = Vector3(x*HORIZ, 0, (y+((x&1)/2.0))*HEIGHT)
+			hex_cell.global_position = Vector3(x*TILE_HORIZ, cell_height, (y+((x&1)/2.0))*TILE_HEIGHT)
 	
-	evenq_grid[-3][0].global_position.y = .5
+	return new_grid
 	
-func _load_commandables():
-	var text = FileAccess.open("res://map_stuff.json", FileAccess.READ).get_as_text()
-	var commandables_data_per_owner: Array = JSON.parse_string(text)
-	
-	for commander_id in range(len(commandables_data_per_owner)):
-		var commandables_data = commandables_data_per_owner[commander_id]
-		var commander: Commander = get_tree().current_scene.find_child("Players").get_children()[commander_id]
-		var to_defend: Commandable # TODO very hacky means of giving units something to defend for testing
-		
-		for data in commandables_data:
-			var scene = load("res://scenes/%s.tscn" % data["com"])
-			var new_guy = scene.instantiate()
-			var x: int = data["loc"][0]
-			var y: int = data["loc"][1]
-			
-			if new_guy is Structure:
-				new_guy.initialize(self, commander, evenq_grid[x][y].global_position)
-				# TODO clean this up
-				remove_child(new_guy)
-				evenq_grid[x][y].add_child(new_guy)
-				new_guy.global_position = evenq_grid[x][y].global_position
-
-				if new_guy is Well:
-					to_defend = new_guy
-			else:
-				new_guy.initialize(self, commander, evenq_grid[x][y].global_position+.5*Vector3.UP)
-				
-				if new_guy is Unit:
-					new_guy.update_commands(Defend.new(to_defend))
-
 func _ready() -> void:
-	_init_grid()
-	_load_commandables()
-		
-	spatial_partition_grid = range(ceili(VU.range(X_RANGE*WIDTH)/SPACE_PARTITION_CELL_RADIUS)).map(
-		func(row): return range(ceili(VU.range(Y_RANGE*HEIGHT)/SPACE_PARTITION_CELL_RADIUS)).map(
+	evenq_grid = _init_grid(grid_config)
+	spatial_partition_grid = range(ceili(evenq_grid.size()*TILE_WIDTH)/SPACE_PARTITION_CELL_RADIUS).map(
+		func(row): return range(ceili(evenq_grid[0].size()*TILE_HEIGHT)/SPACE_PARTITION_CELL_RADIUS).map(
 			func(col): return Set.new()
 		)
 	)
 	
+	active_entities = EventUtils.load_entities_from_event(init_event_config, self)
 	navmesh.bake_navigation_mesh()
-	reassign_entities_in_spatial_partition(true)
+
 
 func _physics_process(delta: float) -> void:
 	reassign_entities_in_spatial_partition()
+	process_events_from_queue()
+	frame+=1
+
+
+### EDITOR
+func _purge() -> void:
+	## Utility function for removing everything from the scene before reloading it
+		active_entities.map(func(a): a.queue_free())
+		get_tree().get_nodes_in_group("entity").map(func(a): a.queue_free())
+		active_entities = []
+		
+		for x in evenq_grid:
+			for y in evenq_grid[x]:
+				evenq_grid[x][y].queue_free()
+		evenq_grid = {}
+
+@export_category("Debug")
+@export var rebuild_map: bool = true:
+	set(value):
+		_purge()
+		_ready()

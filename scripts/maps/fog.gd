@@ -4,6 +4,7 @@ extends MeshInstance3D
 ### SHADER
 ## The set of values representing whether an area of the fog mesh should be drawn
 ## The number of shader points representing the width of 1 distance unit of space
+@onready var center: Vector2 = Vector2(global_position.x, global_position.z)
 const points_per_unit: float = 4
 var fog_texture: PortableCompressedTexture2D
 @onready var fog_image: Image = Image.create(
@@ -15,14 +16,14 @@ var fog_texture: PortableCompressedTexture2D
 
 func world_to_image(world_position: Vector2) -> Vector2i:
 	return Vector2i(
-		round((world_position.x+scale.x/2)*points_per_unit),
-		round((world_position.y+scale.z/2)*points_per_unit)
+		round((world_position.x-center.x+scale.x/2)*points_per_unit),
+		round((world_position.y-center.y+scale.z/2)*points_per_unit)
 	)
 
 func image_to_world(image_coordinate: Vector2i) -> Vector2:
 	return Vector2(
-		image_coordinate.x/points_per_unit-scale.x/2,
-		image_coordinate.y/points_per_unit-scale.z/2
+		image_coordinate.x/points_per_unit-scale.x/2 + center.x,
+		image_coordinate.y/points_per_unit-scale.z/2 + center.y
 	)
 
 

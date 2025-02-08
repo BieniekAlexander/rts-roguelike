@@ -59,10 +59,10 @@ func fulfill_action(a_commandable: Commandable) -> Variant:
 	a_commandable.attack_timer = a_commandable.ATTACK_DURATION
 	
 	if a_commandable.ATTACK_RANGE>0:
-		a_commandable.shotParticles.look_at(
+		a_commandable.find_child("ShotParticles").look_at(
 			Vector3(
 				_target.global_position.x, 
-				a_commandable.shotParticles.global_position.y, 
+				a_commandable.find_child("ShotParticles").global_position.y, 
 				_target.global_position.z
 			)
 		)
@@ -91,3 +91,18 @@ func _init(a_target: Variant) -> void:
 		else:
 			# TODO devise some method for different units to receive different commands based on the type of entity clicked
 			assert(false, "Unsupported command a_target type %s" % a_target)
+
+static func load_command_from_dictionary(a_dictionary: Dictionary, map: Map) -> Command:
+	var command_class = {
+		"move": Command,
+		"attack": AttackMove
+	}[a_dictionary["type"]]
+	
+	var command = command_class.new(
+		map.evenq_grid[
+			int(a_dictionary["loc"][0])
+		][
+			int(a_dictionary["loc"][1])
+		].global_position
+	)
+	return command

@@ -1,0 +1,41 @@
+[
+	{
+		"owners": {
+			"2": {
+				"entities": [
+					{
+						"loc": [6, 16],
+						"res": "res://scenes/units/ranger.tscn",
+						"count": 2
+					}
+				], "command": {
+					"type": "attack",
+					"loc": [2, 2]
+				}
+			}
+		},
+		"time_specs": [
+			{
+				"mean": "270",
+				"stdev": "20",
+				"count": 2
+			}
+		]
+	},
+	{
+		"owners": {"0": {"entities": [{"loc": [10, 10], "res": "res://scenes/items/star.tscn"}]}},
+		"time_specs": [{"mean": "60", "stdev": "10"}]
+	},
+	{
+		"owners": {"0": {"entities": [{"loc": [15, 2], "res": "res://scenes/items/star.tscn"}]}},
+		"time_specs": [{"mean": "120", "stdev": "20"}]
+	},
+	{
+		"owners": {"0": {"entities": [{"loc": [8, 13], "res": "res://scenes/items/star.tscn"}]}},
+		"time_specs": [{"mean": "180", "stdev": "10"}]
+	},
+	{
+		"owners": {"0": {"entities": [{"loc": [3, 18], "res": "res://scenes/items/star.tscn"}]}},
+		"time_specs": [{"mean": "220", "stdev": "30"}]
+	}
+]

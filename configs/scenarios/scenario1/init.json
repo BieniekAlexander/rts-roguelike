@@ -1,0 +1,27 @@
+{
+	"owners": {
+		"0": {
+			"entities": [
+				{"loc": [6, 4], "res": "res://scenes/structures/forest.tscn"},
+				{"loc": [6, 5], "res": "res://scenes/structures/forest.tscn"},
+				{"loc": [6, 6], "res": "res://scenes/structures/forest.tscn"},
+				{"loc": [6, 8], "res": "res://scenes/items/star.tscn"}
+			]
+		},
+		"1": {
+			"entities": [
+				{"loc": [2, 2], "res": "res://scenes/structures/core.tscn"},
+				{"loc": [4, 1], "res": "res://scenes/structures/well.tscn"},
+				{"loc": [4, 2], "res": "res://scenes/structures/well.tscn"},
+				{"loc": [4, 6], "res": "res://scenes/units/ranger.tscn", "count": "3"},
+				{"loc": [3, 5], "res": "res://scenes/units/anima.tscn", "count": "4"}
+			]
+		},
+		"2": {
+			"entities": [
+				{"loc": [16, 12], "res": "res://scenes/units/ranger.tscn", "count": 2},
+				{"loc": [15, 10], "res": "res://scenes/units/anima.tscn", "count": 10}
+			]
+		}
+	}
+}

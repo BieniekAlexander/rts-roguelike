@@ -14,6 +14,10 @@ config/name="RTS Roguelike"
 run/main_scene="res://scenes/game.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 
+[autoload]
+
+JSONSerialization="*res://addons/godot-improved-json/serialize/json_serialization.tscn"
+
 [display]
 
 window/size/mode=4
@@ -21,7 +25,7 @@ window/size/initial_position_type=0
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/csv-data-importer/plugin.cfg", "res://addons/godot-improved-json/plugin.cfg")
 
 [input]
 
