@@ -49,6 +49,15 @@ func _input(event: InputEvent):
 				new_mouse_pos - move_reference_position
 			) * size * movement_speed
 			move_reference_position = new_mouse_pos
+	
+	if event.is_action_pressed("isometric_camera_left", true):
+		global_position += Vector3.LEFT*.5
+	if event.is_action_pressed("isometric_camera_right", true):
+		global_position += Vector3.RIGHT*.5
+	if event.is_action_pressed("isometric_camera_up", true):
+		global_position += Vector3.FORWARD*.5
+	if event.is_action_pressed("isometric_camera_down", true):
+		global_position += Vector3.BACK*.5
 		
 
 func _process(delta: float) -> void:

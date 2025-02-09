@@ -62,7 +62,7 @@ color = Color(0.654902, 0.137255, 0.972549, 0.498039)
 layout_mode = 0
 offset_right = 260.0
 offset_bottom = 85.0
-text = "	aqua: 2080
+text = "	aqua: 1440
 	terra: 100
 	ignis: 10"
 
