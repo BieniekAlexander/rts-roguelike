@@ -2,9 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/maps/hex_cell.gd" id="1_64yu5"]
 [ext_resource type="Texture2D" uid="uid://c4etrbjnm8d43" path="res://assets/hexagon.png" id="2_e1q41"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_oqamo"]
-size = Vector3(0.8, 0.1, 1.6)
+[ext_resource type="ArrayMesh" uid="uid://bruoqqsrxqfrq" path="res://assets/meshes/hex_prism.res" id="3_tnytw"]
 
 [node name="HexCell" type="Node3D"]
 transform = Transform3D(1.08, 0, 0, 0, 1.08, 0, 0, 0, 1.08, 0, 0, 0)
@@ -15,16 +13,7 @@ axis = 1
 render_priority = -5
 texture = ExtResource("2_e1q41")
 
-[node name="Body" type="StaticBody3D" parent="."]
-
-[node name="Collider" type="CollisionShape3D" parent="Body"]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
-shape = SubResource("BoxShape3D_oqamo")
-
-[node name="Collider2" type="CollisionShape3D" parent="Body"]
-transform = Transform3D(0.75, 0, 1.29904, 0, 1.5, 0, -1.29904, 0, 0.75, 0, 0, 0)
-shape = SubResource("BoxShape3D_oqamo")
-
-[node name="Collider3" type="CollisionShape3D" parent="Body"]
-transform = Transform3D(0.75, 0, -1.29904, 0, 1.5, 0, 1.29904, 0, 0.75, 0, 0, 0)
-shape = SubResource("BoxShape3D_oqamo")
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.333, 0, 0, 0, 1.333, 0, 0, 0, 1.333, 0, -1.333, 0)
+visible = false
+mesh = ExtResource("3_tnytw")

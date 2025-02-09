@@ -2,7 +2,6 @@ class_name DropOff
 extends Command
 
 func should_move(a_commandable: Commandable) -> bool:
-	print("in dropoff")
 	return !_target_is_in_range(a_commandable, .1)
 
 func can_act(a_commandable: Commandable) -> bool:

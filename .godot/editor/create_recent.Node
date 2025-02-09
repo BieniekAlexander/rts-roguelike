@@ -1,3 +1,4 @@
+MeshInstance3D
 CollisionShape3D
 NavigationObstacle3D
 CharacterBody3D
@@ -6,7 +7,6 @@ Node3D
 Node
 AnimatedSprite3D
 RichTextLabel
-MeshInstance3D
 Sprite2D
 Timer
 RayCast3D

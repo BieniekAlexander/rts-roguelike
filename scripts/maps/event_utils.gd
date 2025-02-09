@@ -59,7 +59,6 @@ static func load_entities_from_event(a_event_config: Dictionary, map: Map) -> Ar
 							5.
 						)[0]
 					)+(map.evenq_grid[x][y].global_position.y+.5)*Vector3.UP
-					print(new_guy.global_position)
 
 				map.reassign_unit_in_spatial_partition(new_guy)
 			

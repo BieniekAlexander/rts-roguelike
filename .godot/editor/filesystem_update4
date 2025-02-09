@@ -1,8 +1,10 @@
-res://scenes/game.tscn
+res://scenes/hex_cell.tscn
 res://scripts/interface/rts_controller.gd
 res://scripts/shaders/fog.gdshader
 res://scenes/bullet.gdshader
-res://scenes/units/unit.tscn
-res://scripts/maps/event_utils.gd
 res://scenes/map.tscn
+res://scenes/game.tscn
+res://scenes/units/unit.tscn
 res://scripts/maps/map.gd
+res://assets/meshes/hex_prism.res
+res://scripts/maps/hex_cell.gd

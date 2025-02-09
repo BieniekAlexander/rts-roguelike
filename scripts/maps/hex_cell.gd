@@ -5,7 +5,6 @@ extends Node3D
 ### SPATIAL
 var map: Map
 @onready var tile: Sprite3D = $Tile
-@onready var body: StaticBody3D = $Body
 var index: Vector2i
 const TILE_SIZE: float = 1.5
 
@@ -18,7 +17,6 @@ func create_structure(commander: Commander, rebake_navmesh: bool = false) -> Str
 	var s: Structure = load("res://scenes/structures/structure.tscn").instantiate()
 	s.initialize(map, commander, global_position)
 	add_child(s)
-	map.remove_child(body)
 	
 	if rebake_navmesh:
 		map.navmesh.bake_navigation_mesh()

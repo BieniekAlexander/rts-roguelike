@@ -20,6 +20,7 @@ var frame: int = 0
 
 
 func process_events_from_queue() -> void:
+	## Every timestep, go through the event queue and see if there's anything to activate
 	var i: int = 0
 	
 	while i<event_queue.size():
@@ -50,8 +51,9 @@ const TILE_HEIGHT = TILE_WIDTH * sqrt(3)/2.0
 
 
 #### UNIT LOCATION AND NAVIGATION
-@onready var navmesh: NavigationRegion3D = $NavigationRegion
-@onready var SPACE_PARTITION_CELL_RADIUS: float = 5.
+@onready var nav_region := _init_nav_region()
+@onready var navmesh := nav_region.navigation_mesh
+@onready var SPATIAL_PARTITION_CELL_RADIUS: float = 5.
 var spatial_partition_grid: Array
 
 func get_map_hex_cell(point: Vector2) -> HexCell:
@@ -65,8 +67,8 @@ func get_map_hex_cell(point: Vector2) -> HexCell:
 	
 func get_map_spatial_partition_index(point: Vector2) -> Vector2i:
 	return Vector2i(
-		floori((point.x)/SPACE_PARTITION_CELL_RADIUS),
-		floori((point.y)/SPACE_PARTITION_CELL_RADIUS)
+		floori((point.x)/SPATIAL_PARTITION_CELL_RADIUS),
+		floori((point.y)/SPATIAL_PARTITION_CELL_RADIUS)
 	)
 
 func get_entities_in_range(xz_position: Vector2, radius: float) -> Array:
@@ -144,13 +146,22 @@ func get_entity_at_position(xz_position: Vector2) -> Entity:
 	
 	for e: Entity in potential_entities.get_values():
 		if CU.point_in_collider_2d(xz_position, e.collider):
-			print("right-clicked %s" % e)
 			return e
 	
 	return null
 
 
 ### NODE
+func _init_nav_region() -> NavigationRegion3D:
+	var navigation_region = NavigationRegion3D.new()
+	navigation_region.navigation_mesh = NavigationMesh.new()
+	#navigation_region.navigation_mesh.geometry_parsed_geometry_type = NavigationMesh.ParsedGeometryType.PARSED_GEOMETRY_STATIC_COLLIDERS
+	navigation_region.navigation_mesh.agent_height = 1
+	navigation_region.navigation_mesh.agent_radius = .25
+	navigation_region.navigation_mesh.agent_max_climb = .6
+	add_child(navigation_region)
+	return navigation_region
+
 func _init_grid(grid_config: Array) -> Dictionary:
 	var grid_height: int = grid_config[0].size()
 	var grid_width: int = grid_config.size() if grid_config[-1].size()!=0 else grid_config.size()-1
@@ -164,7 +175,7 @@ func _init_grid(grid_config: Array) -> Dictionary:
 			var hex_cell: HexCell = hex_cell_scene.instantiate()
 			hex_cell.init(Vector2i(x, y), self)
 			new_grid[x][y] = hex_cell
-			navmesh.add_child(hex_cell)
+			nav_region.add_child(hex_cell)
 			
 			hex_cell.global_position = Vector3(x*TILE_HORIZ, cell_height, (y+((x&1)/2.0))*TILE_HEIGHT)
 	
@@ -172,14 +183,14 @@ func _init_grid(grid_config: Array) -> Dictionary:
 	
 func _ready() -> void:
 	evenq_grid = _init_grid(grid_config)
-	spatial_partition_grid = range(ceili(evenq_grid.size()*TILE_WIDTH)/SPACE_PARTITION_CELL_RADIUS).map(
-		func(row): return range(ceili(evenq_grid[0].size()*TILE_HEIGHT)/SPACE_PARTITION_CELL_RADIUS).map(
+	spatial_partition_grid = range(ceili(evenq_grid.size()*TILE_WIDTH)/SPATIAL_PARTITION_CELL_RADIUS).map(
+		func(row): return range(ceili(evenq_grid[0].size()*TILE_HEIGHT)/SPATIAL_PARTITION_CELL_RADIUS).map(
 			func(col): return Set.new()
 		)
 	)
 	
 	active_entities = EventUtils.load_entities_from_event(init_event_config, self)
-	navmesh.bake_navigation_mesh()
+	nav_region.bake_navigation_mesh()
 
 
 func _physics_process(delta: float) -> void:

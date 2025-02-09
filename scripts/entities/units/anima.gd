@@ -17,7 +17,6 @@ static func get_command_context() -> CommandContext:
 
 func get_default_interaction_command_type(target):
 	if target is Star:
-		print("get ok")
 		return PickUp
 	elif (
 		!inventory.is_empty() 

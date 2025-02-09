@@ -2,7 +2,6 @@ class_name PickUp
 extends Command
 
 func should_move(a_commandable: Commandable) -> bool:
-	print("pls")
 	return !_target_is_in_range(a_commandable, .1)
 
 func can_act(a_commandable: Commandable) -> bool:
