@@ -47,8 +47,7 @@ var collision_radius: float:
 	get:
 		# TODO remove this stupid Structure check
 		# I have to revisit Structure colliders
-		if self is Structure: return 1
-		var shape = collider.shape
+		var shape = $Collider.shape
 		if shape is SphereShape3D: return shape.radius
 		elif shape is BoxShape3D: return max(shape.size.x, shape.size.z)
 		else:
@@ -63,7 +62,7 @@ func _ready() -> void:
 func initialize(a_map: Map, a_commander: Commander, a_position: Vector3):
 	map = a_map
 	commander = a_commander
-	map.add_child(self)
+	commander.add_child(self)
 	global_position = a_position
 
 func _on_death() -> void:

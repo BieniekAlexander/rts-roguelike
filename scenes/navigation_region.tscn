@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://oboscvprnct6"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_2p8jn"]
+sample_partition_type = 2
+agent_height = 1.0
+agent_radius = 0.25
+agent_max_climb = 0.6
+vertices_per_polygon = 3.0
+
+[node name="NavigationRegion" type="NavigationRegion3D"]
+navigation_mesh = SubResource("NavigationMesh_2p8jn")
+use_edge_connections = false

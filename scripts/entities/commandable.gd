@@ -96,12 +96,6 @@ func _ready() -> void:
 	super()
 	add_to_group("commandable")
 
-func _on_death() -> void:
-	for coords: Vector2i in pc_set.get_values():
-		map.spatial_partition_grid[coords.x][coords.y].remove(self)
-	
-	queue_free()
-
 func _update_state() -> void:
 	if hp <= 0:
 		_on_death()

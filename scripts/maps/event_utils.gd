@@ -1,5 +1,5 @@
 ## Handles a serialized representation of an "event",
-## which encapsulates a group of entities entering the map from "nothing",
+## which encapsulates a group of entities entering the a_map from "nothing",
 ## e.g. a random spawning of a star or a player casting a spell
 class_name EventUtils
 
@@ -22,13 +22,17 @@ static func render_event_config(a_event_config: Dictionary, a_frame: int) -> Var
 	return a_event_config
 	
 
-static func load_entities_from_event(a_event_config: Dictionary, map: Map) -> Array[Entity]:
+static func load_entities_from_event(
+	a_event_config: Dictionary,
+	a_map: Map,
+	commanders: Array
+) -> Array[Entity]:
 	var new_entitites: Array[Entity] = []
 	
 	for key in a_event_config["owners"].keys():
 		var owner_config = a_event_config["owners"][key]
 		var entities_data = owner_config["entities"]
-		var commander: Commander = map.find_child("Players").get_children()[int(key)]
+		var commander: Commander = commanders[int(key)]
 		var new_guys = []
 		
 		for data in entities_data:
@@ -43,28 +47,26 @@ static func load_entities_from_event(a_event_config: Dictionary, map: Map) -> Ar
 				var y: int = data["loc"][1]
 				
 				if new_guy is Structure:
-					new_guy.initialize(map, commander, map.evenq_grid[x][y].global_position)
 					# TODO clean this up
-					map.remove_child(new_guy)
-					map.evenq_grid[x][y].add_child(new_guy)
-					new_guy.global_position = map.evenq_grid[x][y].global_position
+					new_guy.initialize(a_map, commander, a_map.evenq_grid[x][y].global_position)
+					new_guy.global_position = a_map.evenq_grid[x][y].global_position
+					a_map.evenq_grid[x][y].add_structure(new_guy, commander, false)
 				else:
 					# TODO handle if the entities from the event don't fit
-					new_guy.initialize(map, commander, Vector3.ZERO)
+					new_guy.initialize(a_map, commander, Vector3.ZERO)
 					new_guy.global_position = VU.fromXZ(
 						CollisionUtils.get_nonoverlapping_points(
-							map,
-							VU.inXZ(map.evenq_grid[x][y].global_position),
+							a_map,
+							VU.inXZ(a_map.evenq_grid[x][y].global_position),
 							new_guy.collision_radius,
 							5.
 						)[0]
-					)+(map.evenq_grid[x][y].global_position.y+.5)*Vector3.UP
-
-				map.reassign_unit_in_spatial_partition(new_guy)
+					)+(a_map.evenq_grid[x][y].global_position.y+.5)*Vector3.UP
+				
+				a_map.reassign_unit_in_spatial_partition(new_guy)
 			
 			var command = (
-				# TODO pass around map better
-				Command.load_command_from_dictionary(owner_config["command"], new_guys[0].map)
+				Command.load_command_from_dictionary(owner_config["command"], a_map)
 				if owner_config.has("command")
 				else null
 			)
@@ -74,5 +76,6 @@ static func load_entities_from_event(a_event_config: Dictionary, map: Map) -> Ar
 					if g is Commandable:
 						g.update_commands(command)
 
+	a_map.nav_region.bake_navigation_mesh()
 	
 	return new_entitites

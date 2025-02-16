@@ -60,6 +60,20 @@ func _input(event: InputEvent):
 		global_position += Vector3.BACK*.5
 		
 
+# TODO organize
+func get_mouse_world_position(screen_position: Vector2) -> Vector3:
+	var screen_pos_normalized: Vector2 = (screen_position*2/get_viewport().get_visible_rect().size)-Vector2.ONE
+	var camera_point_alt: float = (
+		global_position.y 
+		- screen_pos_normalized.y*(size/2)/sqrt(2)
+	)
+	
+	var depth = camera_point_alt * sqrt(2)
+	return project_position(screen_position, depth)
+
+
+
+
 func _process(delta: float) -> void:
 	#if direction == Vector3.ZERO:
 		#velocity.x = move_toward(velocity.x, 0, movement_friction * delta)

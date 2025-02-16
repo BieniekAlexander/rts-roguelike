@@ -1,8 +1,8 @@
-C:/Users/Bieni/GameDev/GodotProjects/rts-roguelike/configs/scenarios/scenario1
 res://scenes
-res://scenes/structures
 res://
+res://scenes/scenarios
+C:/Users/Bieni/GameDev/GodotProjects/rts-roguelike/configs/scenarios/scenario1
+res://scenes/structures
 res://scripts
 res://scenes/units
-res://assets/hex_mesh
 res://assets

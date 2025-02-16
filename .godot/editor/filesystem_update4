@@ -1,9 +1,7 @@
-res://scenes/game.tscn
+res://map_square_grid_smol.tscn
 res://scripts/interface/rts_controller.gd
 res://scripts/shaders/fog.gdshader
-res://scenes/bullet.gdshader
-res://scenes/units/unit.tscn
-res://scenes/map.tscn
+res://scenes/navigation_region.tscn
+res://scenes/square_cell.tscn
+res://map_hex_grid_smol.tscn
 res://scenes/hex_cell.tscn
-res://scripts/interface/rts_camera_3d.gd
-res://scripts/maps/map.gd

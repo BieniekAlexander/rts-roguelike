@@ -1,9 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://bereove55vuvk"]
+[gd_scene load_steps=9 format=3 uid="uid://bereove55vuvk"]
 
 [ext_resource type="PackedScene" uid="uid://brswqxlmk24kk" path="res://scenes/map.tscn" id="1_5ojvs"]
-[ext_resource type="Script" path="res://scripts/interface/rts_camera_3d.gd" id="2_2nk8l"]
 [ext_resource type="Script" path="res://scripts/interface/commander.gd" id="2_wosgy"]
-[ext_resource type="Script" path="res://scripts/interface/rts_controller.gd" id="3_y7scq"]
+[ext_resource type="PackedScene" uid="uid://b0r4m42p2r3dr" path="res://scenes/player.tscn" id="3_4h3g5"]
 [ext_resource type="Shader" path="res://scripts/shaders/fog.gdshader" id="4_5j8ft"]
 [ext_resource type="Script" path="res://scripts/maps/fog.gd" id="5_1qyxm"]
 
@@ -24,6 +23,7 @@ subdivide_depth = 1
 [node name="Root" type="Node"]
 
 [node name="Map" parent="." instance=ExtResource("1_5ojvs")]
+script = null
 
 [node name="Players" type="Node" parent="Map"]
 
@@ -34,37 +34,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("2_wosgy")
 
-[node name="Player" type="Control" parent="Map/Players"]
-layout_mode = 3
-anchors_preset = 0
-script = ExtResource("2_wosgy")
-id = 1
-
-[node name="Camera" type="Camera3D" parent="Map/Players/Player"]
-transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 14.229, 5)
-projection = 1
-size = 20.0
-far = 500.0
-script = ExtResource("2_2nk8l")
-
-[node name="Controller" type="Node3D" parent="Map/Players/Player" node_paths=PackedStringArray("selection_box", "camera")]
-transform = Transform3D(3.58671, 0, 0, 0, 3.58671, 0, 0, 0, 3.58671, 0, 0, 0)
-script = ExtResource("3_y7scq")
-selection_box = NodePath("SelectionBox")
-camera = NodePath("../Camera")
-
-[node name="SelectionBox" type="ColorRect" parent="Map/Players/Player/Controller"]
-offset_right = 40.0
-offset_bottom = 40.0
-color = Color(0.654902, 0.137255, 0.972549, 0.498039)
-
-[node name="ResourceSummaryLabel" type="RichTextLabel" parent="Map/Players/Player"]
-layout_mode = 0
-offset_right = 260.0
-offset_bottom = 85.0
-text = "	aqua: 1440
-	terra: 100
-	ignis: 10"
+[node name="Player" parent="Map/Players" instance=ExtResource("3_4h3g5")]
 
 [node name="CPU" type="Control" parent="Map/Players"]
 layout_mode = 3

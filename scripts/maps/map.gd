@@ -1,49 +1,12 @@
 @tool
 class_name Map
-extends Node
-
-
-### INPUT HANDLING
-@onready var camera: RTSCamera3D = get_viewport().get_camera_3d()
-
-
-### SCENARIO CONFIG
-var frame: int = 0
-@onready var grid_config: Array = FU.get_data_from_csv_file("res://configs/scenarios/scenario1/grid.csv")
-@onready var init_event_config: Dictionary = FU.get_data_from_json_file("res://configs/scenarios/scenario1/init.json")
-@onready var event_queue: Array = AU.sort_on_key(
-	func(e): return e["timer"],
-	FU.get_data_from_json_file("res://configs/scenarios/scenario1/events.json").map(
-		func(e): return EventUtils.render_event_config(e, 0)
-	)
-)
-
-
-func process_events_from_queue() -> void:
-	## Every timestep, go through the event queue and see if there's anything to activate
-	var i: int = 0
-	
-	while i<event_queue.size():
-		var current_event = event_queue[i]
-		
-		if current_event["timer"] == frame:
-			EventUtils.load_entities_from_event(current_event, self)
-			var updated_event = EventUtils.render_event_config(current_event, frame)
-			event_queue.remove_at(i)
-			
-			if updated_event != null:
-				AU.priority_queue_push(func(e): return e["timer"], current_event, event_queue)
-		elif current_event["timer"] > frame:
-			return
-		else:
-			i+=1
+extends Node3D
 
 
 ### SPACE THINGS
 #### STRUCTURE HEX GRID
-var active_entities: Array[Entity] = []
 var evenq_grid: Dictionary = {}
-var hex_cell_scene: PackedScene = load("res://scenes/hex_cell.tscn")
+static var hex_cell_scene: PackedScene = load("res://scenes/hex_cell.tscn")
 const structure_scene: PackedScene = preload("res://scenes/structures/well.tscn")
 const TILE_WIDTH = HexCell.TILE_SIZE*2.0
 const TILE_HORIZ = TILE_WIDTH * .75
@@ -51,9 +14,8 @@ const TILE_HEIGHT = TILE_WIDTH * sqrt(3)/2.0
 
 
 #### UNIT LOCATION AND NAVIGATION
-@onready var nav_region := _init_nav_region()
-@onready var navmesh := nav_region.navigation_mesh
-@onready var SPATIAL_PARTITION_CELL_RADIUS: float = 5.
+@onready var nav_region: NavigationRegion3D = load("res://scenes/navigation_region.tscn").instantiate()
+static var SPATIAL_PARTITION_CELL_RADIUS: float = 5.
 var spatial_partition_grid: Array
 
 func get_map_hex_cell(point: Vector2) -> HexCell:
@@ -81,7 +43,6 @@ func get_entities_in_range(xz_position: Vector2, radius: float) -> Array:
 
 func get_spatial_partition_coordinates_in_range(xz_position: Vector2, radius: float) -> Set:
 	var ret: Set = Set.new()
-	var center: Vector2i = get_map_spatial_partition_index(xz_position)
 	var top_left: Vector2i = get_map_spatial_partition_index(xz_position-Vector2.ONE*radius)
 	var bot_right: Vector2i = get_map_spatial_partition_index(xz_position+Vector2.ONE*radius)
 	
@@ -110,9 +71,9 @@ func reassign_unit_in_spatial_partition(a_entity: Entity) -> void:
 	
 	a_entity.pc_set = partition_coordinates_set
 
-func reassign_entities_in_spatial_partition(force: bool = false) -> void:
+func reassign_entities_in_spatial_partition(entities: Array, force: bool = false) -> void:
 	# NOTE: to be called each physics tick, after units have moved
-	for e: Entity in get_tree().get_nodes_in_group("entity"):
+	for e: Entity in entities:
 		if e.spatial_partition_dirty or force:
 			reassign_unit_in_spatial_partition(e)
 			e.spatial_partition_dirty = false
@@ -126,19 +87,9 @@ func get_entities_near_point(xz_position: Vector2) -> Set:
 		get_map_spatial_partition_index(xz_position)
 	)
 
-func get_mouse_world_position(screen_position: Vector2) -> Vector3:
-	var screen_pos_normalized: Vector2 = (screen_position*2/get_viewport().get_visible_rect().size)-Vector2.ONE
-	var camera_point_alt: float = (
-		camera.global_position.y 
-		- screen_pos_normalized.y*(camera.size/2)/sqrt(2)
-	)
-
-	var depth = camera_point_alt * sqrt(2)
-	return camera.project_position(screen_position, depth)
-
 
 ### MOVEMENT AND COLLISION
-var units: Array:
+var units: Array: # TODO check
 	get: return get_tree().get_nodes_in_group("commandable").filter(func(c: Commandable): return c is Unit)
 
 func get_entity_at_position(xz_position: Vector2) -> Entity:
@@ -152,67 +103,93 @@ func get_entity_at_position(xz_position: Vector2) -> Entity:
 
 
 ### NODE
-func _init_nav_region() -> NavigationRegion3D:
-	var navigation_region = NavigationRegion3D.new()
-	navigation_region.navigation_mesh = NavigationMesh.new()
-	#navigation_region.navigation_mesh.geometry_parsed_geometry_type = NavigationMesh.ParsedGeometryType.PARSED_GEOMETRY_STATIC_COLLIDERS
-	navigation_region.navigation_mesh.agent_height = 1
-	navigation_region.navigation_mesh.agent_radius = .25
-	navigation_region.navigation_mesh.agent_max_climb = .6
-	add_child(navigation_region)
-	return navigation_region
-
-func _init_grid(grid_config: Array) -> Dictionary:
-	var grid_height: int = grid_config[0].size()
-	var grid_width: int = grid_config.size() if grid_config[-1].size()!=0 else grid_config.size()-1
-	var new_grid = {}
+func load_grid(a_grid_config: Array):
+	assert(a_grid_config.size()>0)
 	
-	for x in range(grid_width):
-		new_grid[x] = {}
-		for y in range(grid_height):
-			var cell_spec: String = grid_config[x][y]
-			var cell_height = float(cell_spec[0])*.5-2.5 # NOTE: hardcoded height relationship, but it's ok
-			var hex_cell: HexCell = hex_cell_scene.instantiate()
-			hex_cell.init(Vector2i(x, y), self)
-			new_grid[x][y] = hex_cell
-			nav_region.add_child(hex_cell)
-			
-			hex_cell.global_position = Vector3(x*TILE_HORIZ, cell_height, (y+((x&1)/2.0))*TILE_HEIGHT)
-	
-	return new_grid
-	
-func _ready() -> void:
-	evenq_grid = _init_grid(grid_config)
-	spatial_partition_grid = range(ceili(evenq_grid.size()*TILE_WIDTH)/SPATIAL_PARTITION_CELL_RADIUS).map(
-		func(row): return range(ceili(evenq_grid[0].size()*TILE_HEIGHT)/SPATIAL_PARTITION_CELL_RADIUS).map(
-			func(col): return Set.new()
-		)
+	evenq_grid = {}
+	var grid_height: int = a_grid_config[0].size()
+	var grid_width: int = (
+		a_grid_config.size()
+		if a_grid_config[-1].size()!=0
+		else a_grid_config.size()-1
 	)
 	
-	active_entities = EventUtils.load_entities_from_event(init_event_config, self)
-	nav_region.bake_navigation_mesh()
+	for x in range(grid_width):
+		evenq_grid[x] = {}
+		for y in range(grid_height): 
+			var hex_cell: HexCell = hex_cell_scene.instantiate()
+			evenq_grid[x][y] = hex_cell
+			nav_region.add_child(hex_cell)
+			hex_cell.set_owner(self)
+			hex_cell.load_config(
+				a_grid_config[x][y],
+				Vector2(
+					x*TILE_HORIZ,
+					(y+((x&1)/2.0))*TILE_HEIGHT
+				)
+			)
 
+@export var grid_config: Array
 
-func _physics_process(delta: float) -> void:
-	reassign_entities_in_spatial_partition()
-	process_events_from_queue()
-	frame+=1
+func _ready() -> void:
+	add_child(nav_region)
+	nav_region.set_owner(self)
+	load_grid(grid_config)
+	
+	spatial_partition_grid = range(ceili(evenq_grid.size()*TILE_WIDTH)/SPATIAL_PARTITION_CELL_RADIUS).map(
+		func(_row): return range(ceili(evenq_grid[0].size()*TILE_HEIGHT)/SPATIAL_PARTITION_CELL_RADIUS).map(
+			func(_col): return Set.new()
+		)
+	)
 
 
 ### EDITOR
 func _purge() -> void:
-	## Utility function for removing everything from the scene before reloading it
-		active_entities.map(func(a): a.queue_free())
-		get_tree().get_nodes_in_group("entity").map(func(a): a.queue_free())
-		active_entities = []
-		
-		for x in evenq_grid:
-			for y in evenq_grid[x]:
-				evenq_grid[x][y].queue_free()
-		evenq_grid = {}
+	if nav_region!=null:
+		nav_region.queue_free()
 
 @export_category("Debug")
-@export var rebuild_map: bool = true:
+static func from_config(
+	a_grid_config: Array
+) -> Map:
+	var ret_map := Map.new()
+	ret_map.grid_config = a_grid_config
+	return ret_map
+
+func load_config(
+	a_config: Array
+) -> void:
+	grid_config = a_config
+
+@export var grid_config_path: String = ""
+@export var load_from_file: bool = true:
 	set(value):
+		grid_config = FU.get_data_from_csv_file(grid_config_path)
 		_purge()
 		_ready()
+
+@export var export: bool = true:
+	set(value):
+		var rows: Array[String] = []
+		
+		for i in evenq_grid:
+			var row_str = ""
+			for j in evenq_grid[i]:
+				row_str += evenq_grid[i][j].get_config()+","
+			
+			row_str = row_str.trim_suffix(",")
+			rows.append(row_str)
+		
+		var file = FileAccess.open(grid_config_path, FileAccess.WRITE_READ)
+		
+		for row_str: String in rows:
+			file.store_line(row_str)
+		
+		file.close()
+
+@export var time_rebake: bool = true:
+	set(value):
+		var start_time = Time.get_unix_time_from_system()
+		nav_region.bake_navigation_mesh()
+		var end_time = Time.get_unix_time_from_system()
+		push_error(end_time-start_time)

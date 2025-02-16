@@ -1,7 +1,8 @@
 class_name RTSController extends Node3D
 
 @export var selection_box: ColorRect = ColorRect.new()
-@export var camera: Camera3D
+@onready var camera: RTSCamera3D = get_viewport().get_camera_3d()
+
 
 ## CONTROL VARIABLES
 @onready var next_command_type = null
@@ -20,10 +21,6 @@ func _ready():
 	selection_box.visible = false
 	if !selection_box.is_inside_tree():
 		add_child(selection_box)
-		
-func _process(delta: float) -> void:
-	# fog of war stuff
-	pass
 
 func _input(event: InputEvent):
 	## MOUSE MOVEMENT
@@ -75,7 +72,7 @@ func _input(event: InputEvent):
 	# ISSUING COMMANDS
 	elif event.is_action_pressed("command_move"):
 		assign_command_to_units(
-			map.get_mouse_world_position(mouse_position),
+			camera.get_mouse_world_position(mouse_position),
 			next_command_type,
 			next_command_additive
 		)
@@ -94,7 +91,7 @@ func set_selected_unit(position: Vector2):
 	# TODO select the unit with something different from get_obstruction
 	# that method checks for a collider, but the sprite is generally bigger in screen space than the collider,
 	# and I probably want to check for sprite collision
-	var hex_coorinate: Vector2 = VU.inXZ(map.get_mouse_world_position(position))
+	var hex_coorinate: Vector2 = VU.inXZ(camera.get_mouse_world_position(position))
 	var entity: Entity = map.get_entity_at_position(hex_coorinate)
 	
 	if entity != null and entity is Commandable:

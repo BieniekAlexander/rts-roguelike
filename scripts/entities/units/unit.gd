@@ -61,9 +61,14 @@ func load_destination(command: Command):
 ## NODE
 func _ready() -> void:
 	super()
+	_nav_agent.avoidance_layers = 1<commander.id
+	_nav_agent.avoidance_mask = 1<commander.id
 	_nav_agent.velocity_computed.connect(Callable(_on_velocity_computed))
-	_nav_agent.avoidance_layers = 1<commander_id
-	_nav_agent.avoidance_mask = 1<commander_id
+
+
+func initialize(a_map: Map, a_commander: Commander, a_position: Vector3):
+	super(a_map, a_commander, a_position)
+	
 
 func _update_state() -> void:
 	super()
