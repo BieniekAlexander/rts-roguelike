@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="RTS Roguelike"
-run/main_scene="res://scenes/game.tscn"
+run/main_scene="res://scenes/scenarios/s1.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 
 [autoload]
@@ -25,7 +25,7 @@ window/size/initial_position_type=0
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/csv-data-importer/plugin.cfg")
+enabled=PackedStringArray("res://addons/csv-data-importer/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [input]
 

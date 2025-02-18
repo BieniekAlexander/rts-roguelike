@@ -3,12 +3,15 @@ class_name Structure
 extends Commandable
 
 
+### POSITION
+var cell: HexCell = null
+@export var cube_grid_arrangement: Array[Vector3i] = [Vector3i.ZERO]
+
 ### RESOURCES
 var terra_amount := 0
 
-
 ### TRAINING
-@onready var training_queue: Array[int] = []
+@onready var training_queue: Array = []
 @onready var rally_command: Command = null
 
 func train(scene) -> void:
@@ -19,11 +22,19 @@ func train(scene) -> void:
 		else Vector3.ZERO
 	)
 	
-	unit.initialize(map, commander, NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, global_position+spawn_bias))
+	unit.initialize(map, commander)
+	unit.global_position = NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, global_position+spawn_bias)
 	unit.update_commands(rally_command)
 
-
 ### NODE
+func _ready() -> void:
+	assert(
+	(
+		cube_grid_arrangement.size()>0 
+		and cube_grid_arrangement[0]==Vector3i.ZERO
+	),
+	"Make sure this is true for consistency")
+
 func _update_state() -> void:
 	super()
 	
@@ -40,11 +51,11 @@ func _process(delta: float) -> void:
 		$TrainBar/TrainBarFill.scale.x = float(training_queue[0])/450 # TODO remove hardcode, sooo lazy
 		$TrainBar/TrainBarFill.position.x = -scale.x * (1-$TrainBar/TrainBarFill.scale.x)
 
-func initialize(a_map: Map, a_commander: Commander, a_position: Vector3):
-	super(a_map, a_commander, a_position)
+func initialize(a_map: Map, a_commander: Commander):
+	super(a_map, a_commander)
 	commander.terra += terra_amount
 
 func _on_death() -> void:
-	map.navmesh.bake_navigation_mesh()
+	map.remove_structure(self)
 	commander.terra -= terra_amount
 	super()

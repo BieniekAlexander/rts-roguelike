@@ -59,11 +59,10 @@ var collision_radius: float:
 func _ready() -> void:
 	add_to_group("entity")
 
-func initialize(a_map: Map, a_commander: Commander, a_position: Vector3):
+func initialize(a_map: Map, a_commander: Commander):
 	map = a_map
 	commander = a_commander
 	commander.add_child(self)
-	global_position = a_position
 
 func _on_death() -> void:
 	for coords: Vector2i in pc_set.get_values():

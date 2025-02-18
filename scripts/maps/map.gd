@@ -4,14 +4,66 @@ extends Node3D
 
 
 ### SPACE THINGS
-#### STRUCTURE HEX GRID
+#### HEX GRID
 var evenq_grid: Dictionary = {}
 static var hex_cell_scene: PackedScene = load("res://scenes/hex_cell.tscn")
-const structure_scene: PackedScene = preload("res://scenes/structures/well.tscn")
+var structure_cell_map: Dictionary = {}
 const TILE_WIDTH = HexCell.TILE_SIZE*2.0
 const TILE_HORIZ = TILE_WIDTH * .75
 const TILE_HEIGHT = TILE_WIDTH * sqrt(3)/2.0
 
+#func evenq_grid_arrangement_rotated(evenq_grid_arrangement: Array[Vector2i], rotation: int) -> Array[Vector2i]:
+	#assert(rotation%60==0)
+	#if rotation%360==0: return evenq_grid_arrangement
+	#
+	#var ret: Array[Vector2i] = evenq_grid_arrangement.duplicate(true)
+	#for i in range(evenq_grid_arrangement.size()):
+		#ret[i] = HU.get_evenq_rotated(evenq_grid_arrangement[i], rotation)
+		#
+	#return ret
+#
+#func cube_grid_arrangement_rotated(cube_grid_arrangement: Array[Vector3i], rotation: int) -> Array[Vector3i]:
+	#assert(rotation%60==0)
+	#if rotation%360==0: return cube_grid_arrangement
+	#
+	#var ret: Array[Vector3i] = cube_grid_arrangement.duplicate(true)
+	#for i in range(cube_grid_arrangement.size()):
+		#ret[i] = HU.get_cube_rotated(cube_grid_arrangement[i], rotation)
+		#
+	#return ret
+
+#func is_valid_structure_position(about_coords: Vector2i, a_grid_arrangement: Array[Vector2i]) -> bool:
+	#var about_cell: HexCell = evenq_grid[about_coords.x][about_coords.y]
+	#var structure_height: float = about_cell.global_position.y #TODO maybe get level
+	#
+	#for offset: Vector2i in a_grid_arrangement:
+		#var location: Vector2i = about_coords+offset
+		#var cell: HexCell = evenq_grid[location.x][location.y]
+		#
+		#if cell.is_occupied: return false
+		#if cell.global_position.y != structure_height: return false
+	#
+	#return true
+
+func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: int) -> void:
+	var cells: Set = Set.new()
+	
+	for location: Vector2i in HU.get_evenq_neighbor_coordinates(
+		evenq_location,
+		a_structure.cube_grid_arrangement
+	):
+		var cell: HexCell = evenq_grid[location.x][location.y]
+		cell.set_occupied(a_structure)
+		cells.add(cell)
+	
+	structure_cell_map[a_structure] = cells
+
+func remove_structure(a_structure: Structure) -> void:
+	var cells: Set = structure_cell_map[a_structure]
+	structure_cell_map.erase(a_structure)
+	
+	for cell: HexCell in cells.get_values():
+		cell.unset_occupied()
 
 #### UNIT LOCATION AND NAVIGATION
 @onready var nav_region: NavigationRegion3D = load("res://scenes/navigation_region.tscn").instantiate()
@@ -19,7 +71,7 @@ static var SPATIAL_PARTITION_CELL_RADIUS: float = 5.
 var spatial_partition_grid: Array
 
 func get_map_hex_cell(point: Vector2) -> HexCell:
-	var index: Vector2i = HU.world_to_evenq_hex(point)
+	var index: Vector2i = HU.world_to_evenq(point)
 	
 	if evenq_grid.has(index.x):
 		if evenq_grid[index.x].has(index.y):
@@ -125,7 +177,7 @@ func load_grid(a_grid_config: Array):
 				a_grid_config[x][y],
 				Vector2(
 					x*TILE_HORIZ,
-					(y+((x&1)/2.0))*TILE_HEIGHT
+					(y-((x&1)/2.0))*TILE_HEIGHT
 				)
 			)
 

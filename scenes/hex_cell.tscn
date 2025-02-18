@@ -22,6 +22,8 @@ visible = false
 mesh = ExtResource("3_tnytw")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_layer = 32768
+collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 shape = SubResource("BoxShape3D_787jh")

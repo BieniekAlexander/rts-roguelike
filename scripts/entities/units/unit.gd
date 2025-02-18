@@ -66,8 +66,8 @@ func _ready() -> void:
 	_nav_agent.velocity_computed.connect(Callable(_on_velocity_computed))
 
 
-func initialize(a_map: Map, a_commander: Commander, a_position: Vector3):
-	super(a_map, a_commander, a_position)
+func initialize(a_map: Map, a_commander: Commander):
+	super(a_map, a_commander)
 	
 
 func _update_state() -> void:

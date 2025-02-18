@@ -48,12 +48,12 @@ static func load_entities_from_event(
 				
 				if new_guy is Structure:
 					# TODO clean this up
-					new_guy.initialize(a_map, commander, a_map.evenq_grid[x][y].global_position)
+					new_guy.initialize(a_map, commander)
+					a_map.add_structure(new_guy, Vector2i(x, y), 0)
 					new_guy.global_position = a_map.evenq_grid[x][y].global_position
-					a_map.evenq_grid[x][y].add_structure(new_guy, commander, false)
 				else:
 					# TODO handle if the entities from the event don't fit
-					new_guy.initialize(a_map, commander, Vector3.ZERO)
+					new_guy.initialize(a_map, commander)
 					new_guy.global_position = VU.fromXZ(
 						CollisionUtils.get_nonoverlapping_points(
 							a_map,
