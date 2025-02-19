@@ -45,8 +45,9 @@ const TILE_HEIGHT = TILE_WIDTH * sqrt(3)/2.0
 	#
 	#return true
 
-func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: int) -> void:
+func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: int, rebake: bool = true) -> void:
 	var cells: Set = Set.new()
+	a_structure.global_position = VU.fromXZ(HU.evenq_to_world(evenq_location))
 	
 	for location: Vector2i in HU.get_evenq_neighbor_coordinates(
 		evenq_location,
@@ -57,13 +58,19 @@ func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: i
 		cells.add(cell)
 	
 	structure_cell_map[a_structure] = cells
+	
+	if rebake:
+		nav_region.bake_navigation_mesh()
 
-func remove_structure(a_structure: Structure) -> void:
+func remove_structure(a_structure: Structure, rebake: bool = true) -> void:
 	var cells: Set = structure_cell_map[a_structure]
 	structure_cell_map.erase(a_structure)
 	
 	for cell: HexCell in cells.get_values():
 		cell.unset_occupied()
+	
+	if rebake:
+		nav_region.bake_navigation_mesh()
 
 #### UNIT LOCATION AND NAVIGATION
 @onready var nav_region: NavigationRegion3D = load("res://scenes/navigation_region.tscn").instantiate()
@@ -78,7 +85,7 @@ func get_map_hex_cell(point: Vector2) -> HexCell:
 			return evenq_grid[index.x][index.y]
 			
 	return null
-	
+
 func get_map_spatial_partition_index(point: Vector2) -> Vector2i:
 	return Vector2i(
 		floori((point.x)/SPATIAL_PARTITION_CELL_RADIUS),
@@ -175,10 +182,7 @@ func load_grid(a_grid_config: Array):
 			hex_cell.set_owner(self)
 			hex_cell.load_config(
 				a_grid_config[x][y],
-				Vector2(
-					x*TILE_HORIZ,
-					(y-((x&1)/2.0))*TILE_HEIGHT
-				)
+				HU.evenq_to_world(Vector2i(x, y))
 			)
 
 @export var grid_config: Array

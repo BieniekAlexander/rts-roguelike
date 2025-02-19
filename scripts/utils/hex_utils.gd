@@ -79,9 +79,15 @@ static func evenq_to_cube(evenq_coordinates: Vector2i) -> Vector3i:
 
 static func world_to_evenq(point: Vector2) -> Vector2i:
 	# reference: https://www.redblobgames.com/grids/hexagons/#pixel-to-hex
-	var q = ( point.x*2.0/3.0					) / (HexCell.TILE_SIZE)
-	var r = (-point.x/3.0 + point.y*sqrt(3)/3.0	) / (HexCell.TILE_SIZE)
+	var q: int = round( point.x*2./3.					 / HexCell.TILE_SIZE)
+	var r: int = round((-point.x/3. + point.y*sqrt(3.)/3.) / HexCell.TILE_SIZE)
 	return cube_to_evenq(cube_round(axial_to_cube(Vector2i(q, r))))
+
+static func evenq_to_world(evenq: Vector2i) -> Vector2:
+	# reference:https://www.redblobgames.com/grids/hexagons/#hex-to-pixel-offset
+	var x: float = HexCell.TILE_SIZE * (3./2) * evenq.x
+	var y: float = HexCell.TILE_SIZE * sqrt(3) * (evenq.y - 0.5 * (evenq.x&1))
+	return Vector2(x, y)
 
 #### NEIGHBORS QUESTION MARK?
 static func get_evenq_neighbor_coordinates(evenq_center: Vector2i, cube_neighbor_coords: Array[Vector3i]) -> Array:

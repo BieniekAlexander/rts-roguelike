@@ -1,9 +1,6 @@
-res://scenes/scenarios/s1.tscn
-res://scripts/interface/rts_controller.gd
-res://scripts/scenario.gd
-res://configs/scenarios/scenario1/init.json
-res://scripts/maps/map.gd
-res://scripts/utils/hex_utils.gd
-res://tests/HexUtils.gd
-res://tests/test_HexUtils.gd
 res://scenes/structures/core.tscn
+res://scripts/maps/map.gd
+res://scenes/scenarios/s1.tscn
+res://tests/test_HexUtils.gd
+res://scripts/utils/hex_utils.gd
+res://scripts/interface/rts_controller.gd
