@@ -5,6 +5,7 @@
 
 [node name="Structure" instance=ExtResource("1_qpx6v")]
 script = ExtResource("2_a4hhe")
+terra_required = 50
 
 [node name="Sprite" parent="." index="1"]
 transform = Transform3D(7.34, 0, 0, 0, 1, 0, 0, 0, 6.902, 0, 0, 0)

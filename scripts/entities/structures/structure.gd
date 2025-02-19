@@ -8,7 +8,8 @@ var cell: HexCell = null
 @export var cube_grid_arrangement: Array[Vector3i] = [Vector3i.ZERO]
 
 ### RESOURCES
-var terra_amount := 0
+@export var terra_provided := 0
+@export var terra_required := 0
 
 ### TRAINING
 @onready var training_queue: Array = []
@@ -53,9 +54,11 @@ func _process(delta: float) -> void:
 
 func initialize(a_map: Map, a_commander: Commander):
 	super(a_map, a_commander)
-	commander.terra += terra_amount
+	commander.terra_max += terra_provided
+	commander.terra_used += terra_required
 
 func _on_death() -> void:
 	map.remove_structure(self)
-	commander.terra -= terra_amount
+	commander.terra_max -= terra_provided
+	commander.terra_used -= terra_required
 	super()

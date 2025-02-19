@@ -25,7 +25,7 @@ func _update_state() -> void:
 	if _command != null:
 		if _command is Train:
 			if commander.aqua>=100:
-				training_queue.push_back(450)
+				training_queue.push_back(300)
 				commander.aqua -= 100
 		
 		_command = null

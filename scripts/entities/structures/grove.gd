@@ -4,4 +4,4 @@ extends Structure
 
 ### NODE
 func _ready() -> void:
-	terra_amount = 100
+	terra_provided = 100

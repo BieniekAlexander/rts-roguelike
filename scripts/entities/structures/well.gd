@@ -3,7 +3,7 @@ class_name Well
 extends Structure
 
 ### RESOURCES
-const TICK_RATE := 30
+const TICK_RATE := 150
 @onready var frame: int = 0
 @onready var aqua_rate := 10
 

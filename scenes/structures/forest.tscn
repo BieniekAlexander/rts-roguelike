@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cpcl7027uxe1r" path="res://assets/greyscale-tree.png" id="2_m0ciq"]
 
 [node name="Structure" instance=ExtResource("1_kxycv")]
+terra_provided = 100
 
 [node name="Sprite" parent="." index="1"]
 transform = Transform3D(0.322959, 0, 0, 0, 1, 0, 0, 0, 0.248468, 0, 0, 0)
