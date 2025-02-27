@@ -110,8 +110,11 @@ command_state_train={
 
 [layer_names]
 
+3d_physics/layer_1="units"
 3d_navigation/layer_1="EverythingElseTbh"
 3d_navigation/layer_2="NavigationFloor"
+3d_physics/layer_5="ground"
+3d_physics/layer_6="water"
 
 [physics]
 

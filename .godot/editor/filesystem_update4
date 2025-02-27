@@ -1,4 +1,14 @@
+res://scenes/map/map.tscn
+res://scripts/maps/hex_stack.gd
+res://scripts/maps/map.gd
+res://scripts/interface/rts_controller.gd
+res://scripts/maps/terrain/terrain.gd
+res://scripts/maps/terrain/water.gd
+res://scripts/entities/structures/structure.gd
+res://scenes/map/terrain.tscn
 res://scenes/scenarios/s1.tscn
 res://scenes/structures/core.tscn
-res://scenes/structures/forest.tscn
 res://scenes/structures/well.tscn
+res://scenes/map/water.tscn
+res://scenes/navigation_region.tscn
+res://scripts/utils/hex_utils.gd

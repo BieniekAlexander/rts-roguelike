@@ -5,8 +5,9 @@ extends Node3D
 
 ### SPACE THINGS
 #### HEX GRID
+static var terrain_scene: PackedScene = load("res://scenes/map/terrain.tscn")
+static var water_scene: PackedScene = load("res://scenes/map/water.tscn")
 var evenq_grid: Dictionary = {}
-static var hex_cell_scene: PackedScene = load("res://scenes/hex_cell.tscn")
 var structure_cell_map: Dictionary = {}
 const TILE_WIDTH = HexCell.TILE_SIZE*2.0
 const TILE_HORIZ = TILE_WIDTH * .75
@@ -77,7 +78,7 @@ func remove_structure(a_structure: Structure, rebake: bool = true) -> void:
 static var SPATIAL_PARTITION_CELL_RADIUS: float = 5.
 var spatial_partition_grid: Array
 
-func get_map_hex_cell(point: Vector2) -> HexCell:
+func get_map_cell(point: Vector2) -> HexCell:
 	var index: Vector2i = HU.world_to_evenq(point)
 	
 	if evenq_grid.has(index.x):
@@ -175,15 +176,17 @@ func load_grid(a_grid_config: Array):
 	
 	for x in range(grid_width):
 		evenq_grid[x] = {}
-		for y in range(grid_height): 
-			var hex_cell: HexCell = hex_cell_scene.instantiate()
-			evenq_grid[x][y] = hex_cell
-			nav_region.add_child(hex_cell)
-			hex_cell.set_owner(self)
-			hex_cell.load_config(
-				a_grid_config[x][y],
-				HU.evenq_to_world(Vector2i(x, y))
-			)
+		for y in range(grid_height):
+			var next_terrain: HexCell = null
+			
+			if a_grid_config[x][y]=='C':
+				next_terrain = terrain_scene.instantiate()
+			elif a_grid_config[x][y]=='W':
+				next_terrain = water_scene.instantiate()
+				
+			evenq_grid[x][y] = next_terrain
+			nav_region.add_child(next_terrain)
+			next_terrain.initialize(self, VU.fromXZ(HU.evenq_to_world(Vector2i(x, y))))
 
 @export var grid_config: Array
 
@@ -197,6 +200,8 @@ func _ready() -> void:
 			func(_col): return Set.new()
 		)
 	)
+	
+	nav_region.bake_navigation_mesh()
 
 
 ### EDITOR

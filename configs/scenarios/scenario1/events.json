@@ -10,7 +10,7 @@
 				], "command": {"type": "attack", "loc": [2, 2]}
 			}
 		},
-		"time_specs": [{"mean": "270000", "stdev": "20", "count": 2}]
+		"time_specs": [{"mean": "270", "stdev": "20", "count": 2}]
 	},
 	{
 		"owners": {"0": {"entities": [{"loc": [10, 10], "res": "res://scenes/items/star.tscn"}]}},
