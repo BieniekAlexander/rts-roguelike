@@ -3,6 +3,12 @@
 ## e.g. a random spawning of a star or a player casting a spell
 class_name EventUtils
 
+static func parse_coordinates(coords: Vector2i, map: Map):
+	return Vector2i(
+		coords.x if coords.x>=0 else map.evenq_grid_width-coords.x,
+		coords.y if coords.y>=0 else map.evenq_grid_height-coords.y
+	)
+
 static func render_event_config(a_event_config: Dictionary, a_frame: int) -> Variant:
 	## Sets the next timer frame for event activation, and decreases counts
 	# TODO find better function name annd wording
@@ -43,25 +49,27 @@ static func load_entities_from_event(
 				var new_guy = scene.instantiate()
 				new_entitites.append(new_guy)
 				new_guys.append(new_guy)
-				var x: int = data["loc"][0]
-				var y: int = data["loc"][1]
+				var loc: Vector2i = parse_coordinates(
+					Vector2i(data["loc"][0], data["loc"][1]),
+					a_map
+				)
 				
 				if new_guy is Structure:
 					# TODO clean this up
 					new_guy.initialize(a_map, commander)
-					a_map.add_structure(new_guy, Vector2i(x, y), 0)
-					new_guy.global_position = a_map.evenq_grid[x][y].global_position
+					a_map.add_structure(new_guy, Vector2i(loc.x, loc.y), 0)
+					new_guy.global_position = a_map.evenq_grid[loc.x][loc.y].global_position
 				else:
 					# TODO handle if the entities from the event don't fit
 					new_guy.initialize(a_map, commander)
 					new_guy.global_position = VU.fromXZ(
 						CollisionUtils.get_nonoverlapping_points(
 							a_map,
-							VU.inXZ(a_map.evenq_grid[x][y].global_position),
+							VU.inXZ(a_map.evenq_grid[loc.x][loc.y].global_position),
 							new_guy.collision_radius,
 							5.
 						)[0]
-					)+(a_map.evenq_grid[x][y].global_position.y+.5)*Vector3.UP
+					)+(a_map.evenq_grid[loc.x][loc.y].global_position.y+.5)*Vector3.UP
 				
 				a_map.reassign_unit_in_spatial_partition(new_guy)
 			

@@ -95,7 +95,8 @@ func _init(a_target: Variant) -> void:
 static func load_command_from_dictionary(a_dictionary: Dictionary, map: Map) -> Command:
 	var command_class = {
 		"move": Command,
-		"attack": AttackMove
+		"attack": AttackMove,
+		"defend": Defend
 	}[a_dictionary["type"]]
 	
 	var command = command_class.new(

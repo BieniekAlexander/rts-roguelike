@@ -16,9 +16,12 @@ static func get_frame_duration_sample(a_distribution: Dictionary) -> int:
 	)
 	
 	var stdev: int = (
-		int(a_distribution["stdev"])
-		if a_distribution["stdev"] is String
-		else get_frames_from_seconds(a_distribution["stdev"])
+		(
+			int(a_distribution["stdev"])
+			if a_distribution["stdev"] is String
+			else get_frames_from_seconds(a_distribution["stdev"])
+		) if a_distribution.has("stdev")
+		else 0
 	)
 	
 	return int(rng.randfn(mean, stdev))

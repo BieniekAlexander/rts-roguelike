@@ -11,7 +11,7 @@ var commander: Commander:
 		_commander = value
 		$Sprite.modulate = TEAM_COLOR_MAP.get(commander_id)
 var commander_id: int:
-	get: return _commander.id
+	get: return _commander.id if _commander!=null else 0
 const TEAM_COLOR_MAP: Dictionary = {
 	0: Color.WHITE,
 	1: Color.AQUA,

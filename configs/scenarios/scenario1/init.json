@@ -1,30 +1,23 @@
 {
 	"owners": {
-		"0": {
-			"entities": [
-				{"loc": [6, 4], "res": "res://scenes/structures/forest.tscn"},
-				{"loc": [6, 5], "res": "res://scenes/structures/forest.tscn"},
-				{"loc": [6, 6], "res": "res://scenes/structures/forest.tscn"},
-				{"loc": [6, 8], "res": "res://scenes/items/star.tscn"}
-			]
-		},
 		"1": {
 			"entities": [
-				{"loc": [1, 1], "res": "res://scenes/structures/core.tscn"},
-				{"loc": [0, 2], "res": "res://scenes/structures/forest.tscn"},
-				{"loc": [3, 0], "res": "res://scenes/structures/forest.tscn"},
-				{"loc": [4, 0], "res": "res://scenes/structures/forest.tscn"},
-				{"loc": [0, 3], "res": "res://scenes/structures/well.tscn"},
-				{"loc": [3, 1], "res": "res://scenes/structures/well.tscn"},
-				{"loc": [4, 6], "res": "res://scenes/units/ranger.tscn", "count": "3"},
-				{"loc": [3, 5], "res": "res://scenes/units/anima.tscn", "count": "4"}
+				{"loc": [4, 22], "res": "res://scenes/structures/core.tscn"},
+				{"loc": [3, 24], "res": "res://scenes/structures/forest.tscn"},
+				{"loc": [4, 24], "res": "res://scenes/structures/forest.tscn"},
+				{"loc": [5, 24], "res": "res://scenes/structures/forest.tscn"},
+				{"loc": [2, 23], "res": "res://scenes/structures/well.tscn"},
+				{"loc": [2, 22], "res": "res://scenes/structures/well.tscn"},
+				{"loc": [3, 20], "res": "res://scenes/units/ranger.tscn", "count": "3"},
+				{"loc": [6, 20], "res": "res://scenes/units/anima.tscn", "count": "4"}
 			]
 		},
 		"2": {
 			"entities": [
-				{"loc": [16, 12], "res": "res://scenes/units/ranger.tscn", "count": 2},
-				{"loc": [15, 10], "res": "res://scenes/units/anima.tscn", "count": 10}
-			]
+				{"loc": [18, 3], "res": "res://scenes/units/ranger.tscn", "count": 2},
+				{"loc": [17, 5], "res": "res://scenes/units/anima.tscn", "count": 10}
+			],
+			"command": {"type": "defend", "loc": [17, 4]}
 		}
 	}
 }

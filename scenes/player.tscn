@@ -1,8 +1,18 @@
-[gd_scene load_steps=4 format=3 uid="uid://b0r4m42p2r3dr"]
+[gd_scene load_steps=8 format=3 uid="uid://b0r4m42p2r3dr"]
 
 [ext_resource type="Script" path="res://scripts/interface/commander.gd" id="1_imw3m"]
 [ext_resource type="Script" path="res://scripts/interface/rts_camera_3d.gd" id="2_omyur"]
 [ext_resource type="Script" path="res://scripts/interface/rts_controller.gd" id="3_q8ke8"]
+[ext_resource type="Shader" path="res://scripts/shaders/fog.gdshader" id="4_ah75o"]
+[ext_resource type="Script" path="res://scripts/maps/fog.gd" id="4_b3a3y"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_qcjp1"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2xwjn"]
+render_priority = 10
+shader = ExtResource("4_ah75o")
+shader_parameter/mesh_scale = null
+shader_parameter/points_per_unit = null
 
 [node name="Player" type="Control"]
 layout_mode = 3
@@ -31,6 +41,12 @@ color = Color(0.654902, 0.137255, 0.972549, 0.498039)
 layout_mode = 0
 offset_right = 260.0
 offset_bottom = 85.0
-text = "	aqua: 1000
-	terra: 100
-	ignis: 10"
+text = "	aqua: 500
+	terra: 0/0
+	ignis: 300"
+
+[node name="Fog" type="MeshInstance3D" parent="."]
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0.5, 0)
+mesh = SubResource("PlaneMesh_qcjp1")
+surface_material_override/0 = SubResource("ShaderMaterial_2xwjn")
+script = ExtResource("4_b3a3y")

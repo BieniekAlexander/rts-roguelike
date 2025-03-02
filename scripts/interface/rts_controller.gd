@@ -57,7 +57,6 @@ func _input(event: InputEvent):
 		var action_name = get_action_names_from_event(event)[0]
 		var next = active_command_context.get_new_context(action_name)
 		
-		
 		if next is CommandContext:
 			active_command_context = next
 		elif next==Command or next.get_base_script()==Command:
