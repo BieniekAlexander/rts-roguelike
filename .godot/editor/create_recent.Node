@@ -1,11 +1,11 @@
-MeshInstance3D
+CharacterBody3D
 Sprite3D
+MeshInstance3D
 CollisionShape3D
 StaticBody3D
 Node3D
 Node
 NavigationObstacle3D
-CharacterBody3D
 AnimatedSprite3D
 RichTextLabel
 Sprite2D

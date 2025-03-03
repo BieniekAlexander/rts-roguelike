@@ -9,6 +9,7 @@ radius = 1.0
 [node name="Star" type="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 script = ExtResource("1_c8ucj")
+sight_range = 3
 
 [node name="Sprite" type="Sprite3D" parent="."]
 transform = Transform3D(10, 0, 0, 0, 7.07107, 7.07107, 0, -7.07107, 7.07107, 0, 0, 0)

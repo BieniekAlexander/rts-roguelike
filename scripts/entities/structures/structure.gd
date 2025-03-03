@@ -35,6 +35,8 @@ func _ready() -> void:
 		and cube_grid_arrangement[0]==Vector3i.ZERO
 	),
 	"Make sure this is true for consistency")
+	
+	add_to_group("structure")
 
 func _update_state() -> void:
 	super()
@@ -58,6 +60,7 @@ func initialize(a_map: Map, a_commander: Commander):
 	commander.terra_used += terra_required
 
 func _on_death() -> void:
+	print(global_position)
 	map.remove_structure(self)
 	commander.terra_max -= terra_provided
 	commander.terra_used -= terra_required

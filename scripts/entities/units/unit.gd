@@ -61,6 +61,7 @@ func load_destination(command: Command):
 ## NODE
 func _ready() -> void:
 	super()
+	add_to_group("unit")
 	_nav_agent.avoidance_layers = 1<commander.id
 	_nav_agent.avoidance_mask = 1<commander.id
 	_nav_agent.velocity_computed.connect(Callable(_on_velocity_computed))

@@ -1,21 +1,43 @@
 ## A camera angled at 45 degrees from above
 class_name RTSCamera3D extends Camera3D
 
-## CONTROL STATE
+### MOVEMENT
+@export_category("Movement")
 @export var movement_speed: float = 1
 @export var movement_friction: float = 1.5
 @export var rotation_speed: float = 0.66
-@export var zoom_speed: float = 20.0
 var dragging_camera: bool = false
 var move_reference_position: Vector2
 
-@export_category("Input Actions")
 @export var rotate_left_action: String = "isometric_camera_rotate_left"
 @export var rotate_right_action: String = "isometric_camera_rotate_right"
+
+func center_on_entity(entity: Entity) -> void:
+	# TODO offset camera position based on height - because the camera is angled, the camera won't be pointing at the entity
+	global_position = global_position.y*Vector3.UP + VU.onXZ(entity.global_position)
+
+### ZOOM
+@export_category("Zoom")
+@export var zoom_speed: float = 20.0
 @export var zoom_in_action: String = "isometric_camera_zoom_in"
 @export var zoom_out_action: String = "isometric_camera_zoom_out"
-
 var zoom_velocity: Vector3 = Vector3.ZERO
+
+func zoom_in_orthogonal(delta: float, zoom_speed: float) -> void:
+	size /= (100+zoom_speed)/100
+	
+func zoom_out_orthogonal(delta: float, zoom_speed: float) -> void:
+	size *= (100+zoom_speed)/100
+	
+func zoom_in_perspective(delta: float, zoom_speed: float) -> void:
+	zoom_velocity = -global_transform.basis.z * zoom_speed * delta
+	zoom_velocity = lerp(zoom_velocity, Vector3.ZERO, (zoom_speed / 2) * delta)
+	position += zoom_velocity
+	
+func zoom_out_perspective(delta: float, zoom_speed: float) -> void:
+	zoom_velocity = global_transform.basis.z * zoom_speed * delta
+	zoom_velocity = lerp(zoom_velocity, Vector3.ZERO, (zoom_speed / 2) * delta)
+	position += zoom_velocity
 
 ## Conditional control function reference
 var zoom_in: Callable
@@ -73,7 +95,7 @@ func get_mouse_world_position(screen_position: Vector2) -> Vector3:
 
 
 
-
+### NODE
 func _process(delta: float) -> void:
 	#if direction == Vector3.ZERO:
 		#velocity.x = move_toward(velocity.x, 0, movement_friction * delta)
@@ -91,20 +113,3 @@ func _process(delta: float) -> void:
 		zoom_in.call(delta, zoom_speed)
 	elif Input.is_action_just_pressed(zoom_out_action):
 		zoom_out.call(delta, zoom_speed)
-
-## Zoom functions
-func zoom_in_orthogonal(delta: float, zoom_speed: float) -> void:
-	size /= (100+zoom_speed)/100
-	
-func zoom_out_orthogonal(delta: float, zoom_speed: float) -> void:
-	size *= (100+zoom_speed)/100
-	
-func zoom_in_perspective(delta: float, zoom_speed: float) -> void:
-	zoom_velocity = -global_transform.basis.z * zoom_speed * delta
-	zoom_velocity = lerp(zoom_velocity, Vector3.ZERO, (zoom_speed / 2) * delta)
-	position += zoom_velocity
-	
-func zoom_out_perspective(delta: float, zoom_speed: float) -> void:
-	zoom_velocity = global_transform.basis.z * zoom_speed * delta
-	zoom_velocity = lerp(zoom_velocity, Vector3.ZERO, (zoom_speed / 2) * delta)
-	position += zoom_velocity

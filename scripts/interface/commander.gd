@@ -15,6 +15,12 @@ extends Control
 @onready var terra_max: int = 0
 @onready var ignis: int = 300
 
+### UNITS
+func get_commandables():
+	return get_tree().get_nodes_in_group("commandable").filter(
+		func(u): return u.commander == self
+	)
+
 ### NODE
 func _process(delta: float) -> void:
 	if get_node_or_null("ResourceSummaryLabel") != null:

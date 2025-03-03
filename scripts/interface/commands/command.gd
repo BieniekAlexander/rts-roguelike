@@ -2,6 +2,9 @@ class_name Command
 static func command_class():
 	pass # TODO clean this up - this was added to let me check if a class inherits Command
 
+# TODO organize
+var projectile_scene: PackedScene = preload("res://scenes/projectiles/projectile.tscn")
+
 ### MOVEMENT
 var _target: Entity = null
 var _position: Vector3 = Vector3.INF
@@ -55,17 +58,14 @@ func can_act(a_commandable: Commandable) -> bool:
 
 func fulfill_action(a_commandable: Commandable) -> Variant:
 	## Perform the command's action and return any relevant follow-up commands
-	_target.receive_damage(a_commandable, a_commandable.DAMAGE)
 	a_commandable.attack_timer = a_commandable.ATTACK_DURATION
 	
 	if a_commandable.ATTACK_RANGE>0:
-		a_commandable.find_child("ShotParticles").look_at(
-			Vector3(
-				_target.global_position.x, 
-				a_commandable.find_child("ShotParticles").global_position.y, 
-				_target.global_position.z
-			)
-		)
+		var projectile: Projectile = projectile_scene.instantiate()
+		projectile.initialize(a_commandable.map, a_commandable.commander)
+		projectile.initialize_projectile(a_commandable, _target)
+	else:
+		_target.receive_damage(a_commandable, a_commandable.DAMAGE)
 	
 	return self
 

@@ -37,6 +37,7 @@ size = Vector3(0.8, 1, 1.6)
 
 [node name="Structure" type="CharacterBody3D" groups=["commandable"]]
 script = ExtResource("1_37vmy")
+sight_range = 100
 
 [node name="NavigationObstacle3D" type="NavigationObstacle3D" parent="."]
 height = 10.0
@@ -60,6 +61,7 @@ region_enabled = true
 region_rect = Rect2(2, 0, 0, 0)
 
 [node name="HPBarFill" type="Sprite3D" parent="HPBar"]
+transform = Transform3D(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 render_priority = 5
 texture = SubResource("GradientTexture1D_u6dgv")
 

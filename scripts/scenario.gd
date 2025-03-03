@@ -75,6 +75,13 @@ func _ready() -> void:
 		commander.set_owner(self)
 		
 	EventUtils.load_entities_from_event(init_event_config, map, commanders)
+	
+	for commander: Commander in commanders: # setting camera
+		if commander.has_node("Camera"):
+			for commandable: Commandable in commander.get_commandables():
+				if commandable is Core:
+					commander.get_node("Camera").center_on_entity(commandable)
+	
 	map.nav_region.bake_navigation_mesh()
 	
 	if Engine.is_editor_hint():

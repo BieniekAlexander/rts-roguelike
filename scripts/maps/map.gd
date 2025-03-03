@@ -96,15 +96,15 @@ func get_map_spatial_partition_index(point: Vector2) -> Vector2i:
 		floori((point.y)/SPATIAL_PARTITION_CELL_RADIUS)
 	)
 
-func get_entities_in_range(xz_position: Vector2, radius: float) -> Array:
+func get_nearby_entities(xz_position: Vector2, radius: float) -> Array:
 	var ret: Set = Set.new()
 	
-	for coordinates: Vector2i in get_spatial_partition_coordinates_in_range(xz_position, radius).get_values():
+	for coordinates: Vector2i in get_nearby_spatial_partitions(xz_position, radius).get_values():
 		ret.add_all(spatial_partition_grid[coordinates.x][coordinates.y].get_values())
 	
 	return ret.get_values()
 
-func get_spatial_partition_coordinates_in_range(xz_position: Vector2, radius: float) -> Set:
+func get_nearby_spatial_partitions(xz_position: Vector2, radius: float) -> Set:
 	var ret: Set = Set.new()
 	var top_left: Vector2i = get_map_spatial_partition_index(xz_position-Vector2.ONE*radius)
 	var bot_right: Vector2i = get_map_spatial_partition_index(xz_position+Vector2.ONE*radius)
@@ -117,7 +117,7 @@ func get_spatial_partition_coordinates_in_range(xz_position: Vector2, radius: fl
 	return ret
 
 func reassign_unit_in_spatial_partition(a_entity: Entity) -> void:
-	var partition_coordinates_set = get_spatial_partition_coordinates_in_range(
+	var partition_coordinates_set = get_nearby_spatial_partitions(
 		VU.inXZ(a_entity.global_position),
 		a_entity.collision_radius
 	)

@@ -6,7 +6,6 @@ extends Entity
 ### RESOURCES
 @export var hpMax: float = 100
 @onready var hp: float = hpMax
-@export_range(0, 100) var sight_range: int = 10
 @onready var build_progress: float = 1
 @onready var inventory: Array[Entity] = []
 @onready var inventory_capacity: int = 1
@@ -14,7 +13,7 @@ extends Entity
 func receive_damage(attacker: Commandable, amount: float) -> void:
 	hp -= amount
 	
-	if hp>0 and _command==null and !(_disposition==Disposition.PASSIVE):
+	if hp>0 and _command==null and attacker!=null and !(_disposition==Disposition.PASSIVE):
 		update_commands(Command.new(attacker), true, true)
 
 
@@ -50,10 +49,10 @@ enum Disposition {
 	AGGRESSIVE
 }
 
-@onready var _disposition: Disposition = Disposition.AGGRESSIVE
+@onready var _disposition: Disposition = Disposition.PASSIVE
 
 func get_aggro_near_position(a_position: Vector2, a_range: float) -> Command:
-	var entities = map.get_entities_in_range(a_position, a_range)
+	var entities = map.get_nearby_entities(a_position, a_range)
 	var commandables = entities.filter(func(e: Entity): return e is Commandable)
 	commandables = AU.sort_on_key(
 		func(e: Entity): return a_position.distance_squared_to(VU.inXZ(e.global_position)),
@@ -82,11 +81,6 @@ func _process(delta: float) -> void:
 		hpBarFill.scale.x = hp/hpMax
 		hpBarFill.position.x = -scale.x * (1-hpBarFill.scale.x)
 	
-	if ATTACK_RANGE>0:
-		# TODO refactor particles
-		var shotParticles: GPUParticles3D = $ShotParticles
-		shotParticles.emitting = attack_timer>0
-		
 	if $SelectionIndicator.visible and Input.is_key_pressed(KEY_BACKSLASH):
 		print("position: %s" % global_position)
 
@@ -98,6 +92,7 @@ func _ready() -> void:
 
 func _update_state() -> void:
 	if hp <= 0:
+		print("low hp")
 		_on_death()
 	
 	if attack_timer>0:

@@ -21,6 +21,10 @@ const TEAM_COLOR_MAP: Dictionary = {
 }
 
 
+### VISION
+@export_range(0, 100) var sight_range: int = 20
+
+
 ### COLLISION
 var map: Map
 var pc_set: Set = Set.new()

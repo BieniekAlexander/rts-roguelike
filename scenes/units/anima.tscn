@@ -8,6 +8,7 @@
 script = ExtResource("2_d7eqb")
 SPEED = 0.125
 AGGRO_RANGE = 5.0
+sight_range = 10
 
 [node name="Sprite" parent="." index="2"]
 transform = Transform3D(5, 0, 0, 0, 3.53553, -3.53553, 0, 3.53553, 3.53553, 0, 0, 0)
@@ -16,3 +17,9 @@ texture = ExtResource("2_q7nwj")
 hframes = 6
 vframes = 5
 frame = 1
+
+[node name="HPBar" parent="." index="3"]
+visible = true
+
+[node name="HPBarFill" parent="HPBar" index="0"]
+transform = Transform3D(0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0)

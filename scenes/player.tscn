@@ -46,7 +46,7 @@ text = "	aqua: 500
 	ignis: 300"
 
 [node name="Fog" type="MeshInstance3D" parent="."]
-transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0.5, 0)
+transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 0, 0.5, 0)
 mesh = SubResource("PlaneMesh_qcjp1")
 surface_material_override/0 = SubResource("ShaderMaterial_2xwjn")
 script = ExtResource("4_b3a3y")

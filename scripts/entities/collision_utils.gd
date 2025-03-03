@@ -12,7 +12,7 @@ static func get_nonoverlapping_points(
 	# TODO handle varying radii
 	var nearby_entities: Array = AU.sort_on_key(
 		func(e: Entity): return VU.inXZ(e.global_position).distance_squared_to(center),
-		map.get_entities_in_range(center, region_radius+point_radius)
+		map.get_nearby_entities(center, region_radius+point_radius)
 	)
 	
 	var occupied_points: Array = nearby_entities.map( # points which will block further placements

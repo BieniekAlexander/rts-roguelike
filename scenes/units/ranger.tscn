@@ -5,10 +5,9 @@
 
 [node name="Unit" instance=ExtResource("1_58vhc")]
 hpMax = 90.0
-AGGRO_RANGE = 5.0
-DAMAGE = 3.0
-ATTACK_RANGE = 5.0
-ATTACK_DURATION = 5
+AGGRO_RANGE = 8.0
+ATTACK_RANGE = 6.0
+sight_range = 10
 
 [node name="Sprite" parent="." index="2"]
 texture = ExtResource("2_huhfs")

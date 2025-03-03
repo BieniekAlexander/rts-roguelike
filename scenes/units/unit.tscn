@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://blcglpbttoi64"]
+[gd_scene load_steps=9 format=3 uid="uid://blcglpbttoi64"]
 
 [ext_resource type="Script" path="res://scripts/entities/units/unit.gd" id="2_3agr1"]
 [ext_resource type="Texture2D" uid="uid://bayqq8wrh6ypl" path="res://assets/greyscale/tiles/logo.png" id="2_tefpw"]
@@ -20,22 +20,11 @@ colors = PackedColorArray(0.686275, 0, 0, 1)
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_cnvxh"]
 gradient = SubResource("Gradient_agsmt")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_0ldvb"]
-direction = Vector3(0, 0, 1)
-spread = 0.0
-initial_velocity_min = -20.0
-initial_velocity_max = -20.0
-gravity = Vector3(0, 0, 0)
-
-[sub_resource type="QuadMesh" id="QuadMesh_okfd7"]
-size = Vector2(0.2, 0.2)
-center_offset = Vector3(0, 0.5, 0)
-orientation = 1
-
 [node name="Unit" type="CharacterBody3D" groups=["commandable"]]
 script = ExtResource("2_3agr1")
 AGGRO_RANGE = 1.0
 DAMAGE = 5.0
+sight_range = null
 
 [node name="NavigationAgent" type="NavigationAgent3D" parent="."]
 path_desired_distance = 0.5
@@ -77,14 +66,6 @@ texture = SubResource("GradientTexture1D_cnvxh")
 transform = Transform3D(0.5, 0, 0, 0, 0.353553, 0.353553, 0, -0.353553, 0.353553, 0, 0, 0)
 visible = false
 texture = ExtResource("3_uy385")
-
-[node name="ShotParticles" type="GPUParticles3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
-visible = false
-emitting = false
-amount = 5
-process_material = SubResource("ParticleProcessMaterial_0ldvb")
-draw_pass_1 = SubResource("QuadMesh_okfd7")
 
 [node name="Timer" type="Timer" parent="."]
 process_callback = 0

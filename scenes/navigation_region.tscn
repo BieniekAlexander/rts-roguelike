@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://oboscvprnct6"]
 
-[sub_resource type="NavigationMesh" id="NavigationMesh_fl7qw"]
+[sub_resource type="NavigationMesh" id="NavigationMesh_y274s"]
 sample_partition_type = 2
 geometry_parsed_geometry_type = 1
 geometry_collision_mask = 4294967056
@@ -10,5 +10,5 @@ agent_max_climb = 0.6
 vertices_per_polygon = 3.0
 
 [node name="NavigationRegion" type="NavigationRegion3D"]
-navigation_mesh = SubResource("NavigationMesh_fl7qw")
+navigation_mesh = SubResource("NavigationMesh_y274s")
 use_edge_connections = false

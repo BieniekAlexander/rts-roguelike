@@ -16,7 +16,6 @@ static var tree_scene: PackedScene = load("res://scenes/structures/forest.tscn")
 static var mountain_scene: PackedScene = load("res://scenes/structures/mountain.tscn")
 
 static func instantiate(config_string: String) -> HexCell:
-	print("parsing from %s" % config_string)
 	var ret: HexCell = null
 	var structure: Structure = null
 	
