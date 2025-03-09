@@ -1,11 +1,12 @@
 [gd_scene load_steps=3 format=3 uid="uid://dsr3o7rqnjdff"]
 
-[ext_resource type="Texture2D" uid="uid://4j5okj7g4kff" path="res://assets/classic/tiles/coin_logo.png" id="1_oqaoy"]
+[ext_resource type="Texture2D" uid="uid://4j5okj7g4kff" path="res://assets/coin_logo.png" id="1_oqaoy"]
 [ext_resource type="Script" path="res://scripts/entities/projectiles/projectile.gd" id="1_s2d6s"]
 
 [node name="Projectile" type="CharacterBody3D"]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 script = ExtResource("1_s2d6s")
+sight_range = 5
 
 [node name="Sprite" type="Sprite3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)

@@ -10,9 +10,3 @@ sight_range = 10
 [node name="Sprite" parent="." index="1"]
 transform = Transform3D(0.322959, 0, 0, 0, 1, 0, 0, 0, 0.248468, 0, 0, 0)
 texture = ExtResource("2_m0ciq")
-
-[node name="HPBar" parent="." index="2"]
-visible = true
-
-[node name="HPBarFill" parent="HPBar" index="1"]
-transform = Transform3D(0, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0)

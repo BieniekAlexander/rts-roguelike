@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://b0r4m42p2r3dr"]
+[gd_scene load_steps=9 format=3 uid="uid://b0r4m42p2r3dr"]
 
 [ext_resource type="Script" path="res://scripts/interface/commander.gd" id="1_imw3m"]
 [ext_resource type="Script" path="res://scripts/interface/rts_camera_3d.gd" id="2_omyur"]
 [ext_resource type="Script" path="res://scripts/interface/rts_controller.gd" id="3_q8ke8"]
 [ext_resource type="Shader" path="res://scripts/shaders/fog.gdshader" id="4_ah75o"]
+[ext_resource type="Script" path="res://scripts/interface/rts_mouse.gd" id="4_axaiq"]
 [ext_resource type="Script" path="res://scripts/maps/fog.gd" id="4_b3a3y"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_qcjp1"]
@@ -36,6 +37,9 @@ selection_box = NodePath("SelectionBox")
 offset_right = 40.0
 offset_bottom = 40.0
 color = Color(0.654902, 0.137255, 0.972549, 0.498039)
+
+[node name="Cursor" type="Node" parent="Controller"]
+script = ExtResource("4_axaiq")
 
 [node name="ResourceSummaryLabel" type="RichTextLabel" parent="."]
 layout_mode = 0

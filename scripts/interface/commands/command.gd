@@ -2,8 +2,6 @@ class_name Command
 static func command_class():
 	pass # TODO clean this up - this was added to let me check if a class inherits Command
 
-# TODO organize
-var projectile_scene: PackedScene = preload("res://scenes/projectiles/projectile.tscn")
 
 ### MOVEMENT
 var _target: Entity = null
@@ -21,14 +19,6 @@ static func requires_position() -> bool:
 
 
 ### UTILS
-func _target_attackable() -> bool:
-	if _target == null:
-		return false
-	elif is_instance_valid(_target):
-		return true
-	else:
-		return false
-
 func _target_is_in_range(a_commandable: Commandable, range: float) -> bool:
 	return (
 		(VU.inXZ(a_commandable.global_position)-VU.inXZ(_target.global_position)).length_squared()
@@ -41,45 +31,21 @@ func get_updated_state(a_commandable: Commandable):
 	## Potentially return a new command based on a state check
 	return self
 
-func meets_precondition(a_commandable: Commandable) -> bool:
-	## TODO I forget when this is checked
+static func meets_precondition(a_map: Map, a_position: Vector3) -> bool:
 	return true
 
 func should_move(a_commandable: Commandable) -> bool:
-	return !_target_attackable() or !_target_is_in_range(a_commandable, a_commandable.ATTACK_RANGE)
+	return true
 
 func can_act(a_commandable: Commandable) -> bool:
-	return (
-		_target_attackable()
-		and _target!=a_commandable
-		and _target_is_in_range(a_commandable, a_commandable.ATTACK_RANGE)
-		and a_commandable.attack_timer<=0
-	)
+	return false
 
 func fulfill_action(a_commandable: Commandable) -> Variant:
-	## Perform the command's action and return any relevant follow-up commands
-	a_commandable.attack_timer = a_commandable.ATTACK_DURATION
-	
-	if a_commandable.ATTACK_RANGE>0:
-		var projectile: Projectile = projectile_scene.instantiate()
-		projectile.initialize(a_commandable.map, a_commandable.commander)
-		projectile.initialize_projectile(a_commandable, _target)
-	else:
-		_target.receive_damage(a_commandable, a_commandable.DAMAGE)
-	
+	push_error("no action should have been performed")
 	return self
 
 func is_finished() -> bool:
-	## Check whether the action should be discontinued
-	# For the basic command, if targeting a commandable, check if it still exists
-	# ref: https://forum.godotengine.org/t/distinguish-between-freed-object-and-null/3838
-	if hash(_target)==hash(null):
-		return false
-	elif !is_instance_valid(_target):
-		return true
-	else:
-		return false
-
+	return false
 
 ### NODE
 func _init(a_target: Variant) -> void:
@@ -95,7 +61,7 @@ func _init(a_target: Variant) -> void:
 static func load_command_from_dictionary(a_dictionary: Dictionary, map: Map) -> Command:
 	var command_class = {
 		"move": Command,
-		"attack": AttackMove,
+		"attack_move": AttackMove,
 		"defend": Defend
 	}[a_dictionary["type"]]
 	

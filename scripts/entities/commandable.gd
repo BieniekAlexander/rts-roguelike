@@ -16,14 +16,20 @@ func receive_damage(attacker: Commandable, amount: float) -> void:
 	if hp>0 and _command==null and attacker!=null and !(_disposition==Disposition.PASSIVE):
 		update_commands(Command.new(attacker), true, true)
 
+static func command_evaluator_commandable(c: Commandable, target: Variant):
+	if target is Commandable and target.commander_id != c.commander_id:
+		return Attack
+	else:
+		return Command
 
 ### COMMANDS
 @export var AGGRO_RANGE: float = 5
 @onready var _command: Command = null
 @onready var _fallback_command: Command = Command.new(self)
 @onready var _command_queue: Array[Command] = []
-static var commandable_command_context = CommandContext.new({
-	null: Command,
+static var commandable_command_context = CommandContext.new(
+	command_evaluator_commandable,
+	{"command_state_attack_move": CommandContext.new(AttackMove.evaluator, {})
 })
 
 static func get_command_context() -> CommandContext:
@@ -65,7 +71,7 @@ func get_aggro_near_position(a_position: Vector2, a_range: float) -> Command:
 			and (global_position-c.global_position).length_squared() < pow(a_range, 2)
 		):
 			# TODO find the closest one, with some sort of priority
-			return Command.new(c)
+			return Attack.new(c)
 	
 	return null
 
@@ -92,7 +98,6 @@ func _ready() -> void:
 
 func _update_state() -> void:
 	if hp <= 0:
-		print("low hp")
 		_on_death()
 	
 	if attack_timer>0:
@@ -158,10 +163,3 @@ func update_commands(a_commands, add_to_queue: bool = false, prepend: bool = fal
 			_command_queue = a_commands.slice(1)
 	else:
 		push_error("Command argument is unsupported, arg=%s" % a_commands)
-
-func get_default_interaction_command_type(target):
-	if target is Commandable or target is Vector3:
-		return Command
-	else:
-		return null
-		push_error("Undefined interaction between this type and %s" % target)

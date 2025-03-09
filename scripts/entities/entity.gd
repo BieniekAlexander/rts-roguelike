@@ -14,10 +14,10 @@ var commander_id: int:
 	get: return _commander.id if _commander!=null else 0
 const TEAM_COLOR_MAP: Dictionary = {
 	0: Color.WHITE,
-	1: Color.AQUA,
-	2: Color.YELLOW,
-	3: Color.WEB_GREEN,
-	4: Color.RED
+	1: Color(.2, 1, 1),
+	2: Color(1, 1, .2),
+	3: Color(.1, .6, .1),
+	4: Color(1, .2, .2)
 }
 
 
@@ -28,7 +28,7 @@ const TEAM_COLOR_MAP: Dictionary = {
 ### COLLISION
 var map: Map
 var pc_set: Set = Set.new()
-@onready var collider: CollisionShape3D = $Collider
+@onready var collider: CollisionShape3D = get_node_or_null("Collider")
 @onready var spatial_partition_dirty: bool = false
 
 func get_collision_extents() -> Array[Vector2]:

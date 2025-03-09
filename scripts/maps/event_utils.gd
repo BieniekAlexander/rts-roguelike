@@ -31,7 +31,8 @@ static func render_event_config(a_event_config: Dictionary, a_frame: int) -> Var
 static func load_entities_from_event(
 	a_event_config: Dictionary,
 	a_map: Map,
-	commanders: Array
+	commanders: Array,
+	rebake_nav_mesh: bool = true
 ) -> Array[Entity]:
 	var new_entitites: Array[Entity] = []
 	
@@ -57,7 +58,7 @@ static func load_entities_from_event(
 				if new_guy is Structure:
 					# TODO clean this up
 					new_guy.initialize(a_map, commander)
-					a_map.add_structure(new_guy, Vector2i(loc.x, loc.y), 0)
+					a_map.add_structure(new_guy, Vector2i(loc.x, loc.y), 0, false)
 					new_guy.global_position = a_map.evenq_grid[loc.x][loc.y].global_position
 				else:
 					# TODO handle if the entities from the event don't fit
@@ -83,7 +84,8 @@ static func load_entities_from_event(
 				for g in new_guys:
 					if g is Commandable:
 						g.update_commands(command)
-
-	a_map.nav_region.bake_navigation_mesh()
+	
+	if rebake_nav_mesh:
+		a_map.nav_region.bake_navigation_mesh()
 	
 	return new_entitites

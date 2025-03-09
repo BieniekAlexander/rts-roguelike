@@ -6,13 +6,6 @@ extends Commandable
 ## COMMANDS
 @export var SPEED: float = .1
 @onready var SPEED_PER_SECOND: float = SPEED*Engine.physics_ticks_per_second
-static var unit_command_context = CommandContext.new({
-	null: Command,
-	"command_state_attack_move": AttackMove
-})
-
-static func get_command_context() -> CommandContext:
-	return unit_command_context
 
 ## NAVIGATION AGENT
 @onready var _nav_agent: NavigationAgent3D = $NavigationAgent

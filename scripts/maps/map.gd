@@ -55,6 +55,11 @@ func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: i
 		var cell: HexCell = evenq_grid[location.x][location.y]
 		cell.set_occupied(a_structure)
 		cells.add(cell)
+		
+		if a_structure is Well:
+			cell.set_spring()
+			# TODO not a good spot for this - but I'm looking to guarantee that,
+			# if the game adds a well somewhere, it forces the tile to be a spring
 	
 	structure_cell_map[a_structure] = cells
 	
@@ -197,8 +202,6 @@ func _ready() -> void:
 			func(_col): return Set.new()
 		)
 	)
-	
-	nav_region.bake_navigation_mesh()
 
 
 ### EDITOR
@@ -222,7 +225,7 @@ func load_config(
 @export var grid_config_path: String = ""
 @export var load_from_file: bool = true:
 	set(value):
-		grid_config = FU.get_data_from_csv_file(grid_config_path)
+		grid_config = FSU.get_data_from_csv_file(grid_config_path)
 		_purge()
 		_ready()
 

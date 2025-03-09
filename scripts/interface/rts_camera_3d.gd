@@ -83,14 +83,14 @@ func _input(event: InputEvent):
 		
 
 # TODO organize
-func get_mouse_world_position(screen_position: Vector2) -> Vector3:
+func get_mouse_world_position(screen_position: Vector2, height: float = 0) -> Vector3:
 	var screen_pos_normalized: Vector2 = (screen_position*2/get_viewport().get_visible_rect().size)-Vector2.ONE
 	var camera_point_alt: float = (
 		global_position.y 
 		- screen_pos_normalized.y*(size/2)/sqrt(2)
 	)
 	
-	var depth = camera_point_alt * sqrt(2)
+	var depth = (camera_point_alt - height) * sqrt(2)
 	return project_position(screen_position, depth)
 
 

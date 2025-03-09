@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://blcglpbttoi64" path="res://scenes/units/unit.tscn" id="1_1dy7s"]
 [ext_resource type="Script" path="res://scripts/entities/units/anima.gd" id="2_d7eqb"]
-[ext_resource type="Texture2D" uid="uid://cdhuq0qhbt6qo" path="res://assets/animaSheet.png" id="2_q7nwj"]
+[ext_resource type="Texture2D" uid="uid://b06ixdn7o8rgi" path="res://assets/rtsWorker.png" id="3_spqwu"]
 
 [node name="Unit" instance=ExtResource("1_1dy7s")]
 script = ExtResource("2_d7eqb")
@@ -11,15 +11,5 @@ AGGRO_RANGE = 5.0
 sight_range = 10
 
 [node name="Sprite" parent="." index="2"]
-transform = Transform3D(5, 0, 0, 0, 3.53553, -3.53553, 0, 3.53553, 3.53553, 0, 0, 0)
-offset = Vector2(0, 4)
-texture = ExtResource("2_q7nwj")
-hframes = 6
-vframes = 5
-frame = 1
-
-[node name="HPBar" parent="." index="3"]
-visible = true
-
-[node name="HPBarFill" parent="HPBar" index="0"]
-transform = Transform3D(0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0)
+transform = Transform3D(6, 0, 0, 0, 4.24264, -4.24264, 0, 4.24264, 4.24264, 0, 0, 0)
+texture = ExtResource("3_spqwu")

@@ -7,7 +7,7 @@
 						"res": "res://scenes/units/ranger.tscn",
 						"count": 2
 					}
-				], "command": {"type": "attack", "loc": [5, 24]}
+				], "command": {"type": "attack_move", "loc": [5, 24]}
 			}
 		},
 		"time_specs": [
@@ -22,7 +22,7 @@
 						"res": "res://scenes/units/ranger.tscn",
 						"count": 2
 					}
-				], "command": {"type": "attack", "loc": [2, 24]}
+				], "command": {"type": "attack_move", "loc": [2, 24]}
 			}
 		},
 		"time_specs": [
@@ -37,7 +37,7 @@
 						"res": "res://scenes/units/ranger.tscn",
 						"count": 6
 					}
-				], "command": {"type": "attack", "loc": [2, 24]}
+				], "command": {"type": "attack_move", "loc": [2, 24]}
 			}
 		},
 		"time_specs": [

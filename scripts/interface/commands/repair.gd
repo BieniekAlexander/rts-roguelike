@@ -1,7 +1,7 @@
 class_name Repair
 extends Command
 
-func meets_precondition(a_commandable: Commandable) -> bool:
+static func meets_precondition(a_map: Map, a_position: Vector3) -> bool:
 	# TODO this should only be performable by certain units
 	return true
 

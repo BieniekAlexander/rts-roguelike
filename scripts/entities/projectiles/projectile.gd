@@ -6,7 +6,7 @@ var source: Commandable
 
 ### MOVEMENT
 const gravity: float = -.01
-const speed: float = .3
+const speed: float = .5
 var origin: Vector3
 var damage: float = 5
 
@@ -16,10 +16,13 @@ func _physics_process(delta: float) -> void:
 	if velocity.y<0 and global_position.y <= origin.y:
 		var bodies: Array = map.get_nearby_entities(VU.inXZ(global_position), 0)
 		
-		for body: Entity in bodies:
+		for body: Entity in AU.sort_on_key(
+			func(b): return VU.inXZ(global_position).distance_squared_to(VU.inXZ(b.global_position)),
+			bodies
+		):
 			if body is Commandable and VU.inXZ(global_position).distance_squared_to(VU.inXZ(body.global_position))<(body.collision_radius**2):
 				if not is_instance_valid(source): source = null
-				bodies[0].receive_damage(source, damage)
+				body.receive_damage(source, damage)
 		
 		_on_death()
 	
@@ -37,4 +40,4 @@ func initialize_projectile(a_source: Variant, a_target: Variant) -> void:
 	var vert_velocity: float = -gravity*time_to_target/2
 	
 	global_position = origin
-	velocity = (target-origin).normalized()*speed + vert_velocity*Vector3.UP
+	velocity = (target-origin).normalized()*speed + (vert_velocity+gravity)*Vector3.UP

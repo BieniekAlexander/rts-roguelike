@@ -3,6 +3,12 @@ extends Command
 
 static func command_class():
 	pass
+	
+static func evaluator(c: Commandable, t: Variant):
+	if t is Commandable:
+		return Attack
+	else:
+		return AttackMove
 
 ### STATE UPDATES
 func get_updated_state(a_commandable: Commandable):

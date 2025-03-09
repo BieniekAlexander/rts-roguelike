@@ -5,7 +5,7 @@ class_name RTSController extends Node3D
 
 
 ## CONTROL VARIABLES
-@onready var next_command_type = null
+@onready var next_command_type = Command
 @onready var next_command_additive: bool = false
 var mouse_position: Vector2 = Vector2.ZERO
 var select_down_position: Vector2 = Vector2.ZERO
@@ -65,16 +65,19 @@ func _input(event: InputEvent):
 			if !next.requires_position():
 				assign_command_to_units(
 					Vector3.ZERO,
-					next_command_type,
+					active_command_context,
 					next_command_additive
 				)
 	# ISSUING COMMANDS
 	elif event.is_action_pressed("command_move"):
-		assign_command_to_units(
-			camera.get_mouse_world_position(mouse_position),
-			next_command_type,
-			next_command_additive
-		)
+		if next_command_type.meets_precondition(map, camera.get_mouse_world_position(mouse_position)):
+			assign_command_to_units(
+				camera.get_mouse_world_position(mouse_position),
+				active_command_context,
+				next_command_additive
+			)
+		else:
+			next_command_type = Command
 	elif event.is_action_pressed("command_stop"):
 		cancel_command_for_units()
 		set_active_command_context(selection)
@@ -90,7 +93,7 @@ func set_selected_unit(position: Vector2):
 	# TODO select the unit with something different from get_obstruction
 	# that method checks for a collider, but the sprite is generally bigger in screen space than the collider,
 	# and I probably want to check for sprite collision
-	var hex_coorinate: Vector2 = VU.inXZ(camera.get_mouse_world_position(position))
+	var hex_coorinate: Vector2 = VU.inXZ(camera.get_mouse_world_position(position, .5))
 	var entity: Entity = map.get_entity_at_position(hex_coorinate)
 	
 	if entity != null and entity is Commandable:
@@ -143,7 +146,7 @@ func cancel_command_for_units() -> void:
 
 func assign_command_to_units(
 	world_position: Vector3,
-	a_command_type,
+	a_command_context: Variant,
 	add_to_queue: bool
 ) -> void:
 	var selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
@@ -155,20 +158,19 @@ func assign_command_to_units(
 	if targeted_entity == null:
 		targeted_entity = VU.onXZ(world_position)
 	
-	if a_command_type==null:
-		a_command_type = selection[0].get_default_interaction_command_type(targeted_entity)
+	var a_command_type = a_command_context.evaluator.call(selection[0], targeted_entity)
 	
-	var new_command: Command = a_command_type.new(targeted_entity)
+	if a_command_type != null:
+		var new_command: Command = a_command_type.new(targeted_entity)
 	
-	for c: Commandable in selection:
-		if c.get_script().get_command_context().commands.has(a_command_type):
+		for c: Commandable in selection:
 			c.update_commands(
 				new_command,
 				add_to_queue
 			)
 	
 	if !add_to_queue:
-		next_command_type = null
+		next_command_type = Command
 		set_active_command_context(selection)
 
 func deselect():

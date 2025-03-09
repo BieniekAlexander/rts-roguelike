@@ -61,7 +61,6 @@ region_enabled = true
 region_rect = Rect2(2, 0, 0, 0)
 
 [node name="HPBarFill" type="Sprite3D" parent="HPBar"]
-transform = Transform3D(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 render_priority = 5
 texture = SubResource("GradientTexture1D_u6dgv")
 

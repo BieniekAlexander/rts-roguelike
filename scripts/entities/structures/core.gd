@@ -3,10 +3,12 @@ class_name Core
 extends Structure
 
 
-static var core_command_context = CommandContext.new({
-	null: Command,
-	"command_state_train": Train
-})
+static var core_command_context = CommandContext.new(
+	Commandable.command_evaluator_commandable,
+	{"command_state_train": Train}
+).plus(
+	Commandable.commandable_command_context
+)
 
 static func get_command_context() -> CommandContext:
 	return core_command_context

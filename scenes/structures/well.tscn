@@ -10,9 +10,3 @@ sight_range = 10
 
 [node name="Sprite" parent="." index="1"]
 transform = Transform3D(7.34, 0, 0, 0, 1, 0, 0, 0, 6.902, 0, 0, 0)
-
-[node name="HPBar" parent="." index="2"]
-visible = true
-
-[node name="HPBarFill" parent="HPBar" index="1"]
-transform = Transform3D(0, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0)
