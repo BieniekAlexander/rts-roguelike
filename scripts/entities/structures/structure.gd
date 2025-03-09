@@ -37,6 +37,7 @@ func _ready() -> void:
 	"Make sure this is true for consistency")
 	
 	add_to_group("structure")
+	super()
 
 func _update_state() -> void:
 	super()
