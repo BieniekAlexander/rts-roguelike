@@ -1,6 +1,7 @@
 class_name Build
 extends Command
 
+
 static func evaluator(c: Commandable, t: Variant) -> Variant:
 	if meets_precondition(c.map, t):
 		return Build

@@ -4,12 +4,11 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dtvyhmlircwee"
-path="res://.godot/imported/hexpriz.dae-7014361ee8bb8ebf9524de0c68b6c250.scn"
+valid=false
 
 [deps]
 
 source_file="res://hexpriz.dae"
-dest_files=["res://.godot/imported/hexpriz.dae-7014361ee8bb8ebf9524de0c68b6c250.scn"]
 
 [params]
 

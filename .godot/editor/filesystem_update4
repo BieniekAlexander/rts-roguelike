@@ -28,3 +28,6 @@ res://scripts/interface/commands/command_context.gd
 res://scripts/utils/function_utils.gd
 res://scripts/interface/commands/attack_move.gd
 res://scripts/entities/structures/core.gd
+res://configs/scenarios/scenario2/grid.A.translation
+res://addons/gut/gui/GutSceneTheme.tres
+res://scripts/interface/commands/train.gd

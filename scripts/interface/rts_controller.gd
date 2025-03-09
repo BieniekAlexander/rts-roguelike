@@ -55,14 +55,12 @@ func _input(event: InputEvent):
 	# TODO cleanup mapping of event to action - Godot does not make this easy
 	elif get_action_names_from_event(event).size()>0:
 		var action_name = get_action_names_from_event(event)[0]
-		var next = active_command_context.get_new_context(action_name)
 		
-		if next is CommandContext:
-			active_command_context = next
-		elif next==Command or next.get_base_script()==Command:
-			next_command_type = next
-			# TODO find a better way to make this check
-			if !next.requires_position():
+		if active_command_context is CommandContext:
+			active_command_context = active_command_context.get_new_context(action_name)
+			
+		if active_command_context.has_method("command_class"):
+			if !active_command_context.requires_position():
 				assign_command_to_units(
 					Vector3.ZERO,
 					active_command_context,
@@ -70,17 +68,22 @@ func _input(event: InputEvent):
 				)
 	# ISSUING COMMANDS
 	elif event.is_action_pressed("command_move"):
-		if next_command_type.meets_precondition(map, camera.get_mouse_world_position(mouse_position)):
+		if active_command_context.has_method("command_class"):
+			if active_command_context.meets_precondition(map, camera.get_mouse_world_position(mouse_position)):
+				assign_command_to_units(
+					camera.get_mouse_world_position(mouse_position),
+					active_command_context,
+					next_command_additive
+				)
+		else:
 			assign_command_to_units(
 				camera.get_mouse_world_position(mouse_position),
 				active_command_context,
 				next_command_additive
 			)
-		else:
-			next_command_type = Command
 	elif event.is_action_pressed("command_stop"):
 		cancel_command_for_units()
-		set_active_command_context(selection)
+		active_command_context = get_default_active_command_context(selection)
 
 func set_selection(selection_start_position: Vector2, selection_end_position: Vector2):
 	var drag_distance = abs(selection_start_position - selection_end_position)
@@ -100,7 +103,7 @@ func set_selected_unit(position: Vector2):
 		selection.append(entity)
 		entity.set_selected()
 	
-	set_active_command_context(selection)
+	active_command_context = get_default_active_command_context(selection)
 
 func set_selected_units():
 	var selection_box_geometry: PackedVector2Array = [
@@ -117,15 +120,15 @@ func set_selected_units():
 			selection.append(c)
 			c.set_selected()
 	
-	set_active_command_context(selection)
+	active_command_context = get_default_active_command_context(selection)
 
-func set_active_command_context(a_commandables: Array) -> void:
+func get_default_active_command_context(a_commandables: Array) -> CommandContext:
 	selected_unit_types.clear()
 	
 	for c: Commandable in a_commandables:
 		selected_unit_types.add(c.get_script())
 	
-	active_command_context = selected_unit_types.map(
+	return selected_unit_types.map(
 		func(t): return t.get_command_context()
 	).reduce(
 		func(a, b): return CommandContext.merge(a, b),
@@ -158,7 +161,11 @@ func assign_command_to_units(
 	if targeted_entity == null:
 		targeted_entity = VU.onXZ(world_position)
 	
-	var a_command_type = a_command_context.evaluator.call(selection[0], targeted_entity)
+	var a_command_type = (
+		a_command_context.evaluator.call(selection[0], targeted_entity)
+		if a_command_context is CommandContext
+		else a_command_context
+	)
 	
 	if a_command_type != null:
 		var new_command: Command = a_command_type.new(targeted_entity)
@@ -171,7 +178,7 @@ func assign_command_to_units(
 	
 	if !add_to_queue:
 		next_command_type = Command
-		set_active_command_context(selection)
+		get_default_active_command_context(selection)
 
 func deselect():
 	for c in selection:
