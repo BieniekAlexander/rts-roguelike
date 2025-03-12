@@ -70,13 +70,9 @@ static func instantiate(config_string: String) -> HexCell:
 	elif config_string=="t":
 		ret.terrain_type = TerrainType.GRASS
 		structure = tree_scene.instantiate()
-		ret.set_occupied(tree_scene.instantiate())
-		ret.add_child(structure)
 	elif config_string=="A":
 		ret.terrain_type = TerrainType.GRASS
 		structure = mountain_scene.instantiate()
-		ret.set_occupied(structure)
-		ret.add_child(structure)
 	elif config_string==".":
 		ret.terrain_type = TerrainType.SHALLOW
 	elif config_string==":":
@@ -85,6 +81,10 @@ static func instantiate(config_string: String) -> HexCell:
 		ret.terrain_type = TerrainType.WATER
 	else:
 		assert(false, "unrecognized cell config string: '%s'" % config_string)
+	
+	if structure!=null:
+		ret.set_occupied(structure)
+		ret.add_child(structure)
 	
 	return ret
 
@@ -107,3 +107,6 @@ func _ready() -> void:
 func initialize(a_map: Map, a_position: Vector3) -> void:
 	global_position = a_position
 	set_owner(a_map)
+	
+	if structure!=null:
+		structure.global_position = global_position

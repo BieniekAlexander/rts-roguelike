@@ -46,10 +46,7 @@ func _update_velocity() -> void:
 		_nav_agent.set_velocity(Vector3.ZERO)
 
 func load_destination(command: Command):
-	if _command._target != null:
-		_nav_agent.set_target_position(_command._target.global_position)
-	else:
-		_nav_agent.set_target_position(_command.position)
+	_nav_agent.set_target_position(_command.message.position)
 
 ## NODE
 func _ready() -> void:
@@ -67,7 +64,7 @@ func initialize(a_map: Map, a_commander: Commander):
 func _update_state() -> void:
 	super()
 	
-	if _command!=null and _nav_agent.target_position != _command.position:
+	if _command!=null and _nav_agent.target_position != _command.message.position:
 			load_destination(_command)
 			_stop_timer.start()
 	elif _nav_agent.is_navigation_finished():

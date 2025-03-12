@@ -182,6 +182,12 @@ func load_grid(a_grid_config: Array):
 		else a_grid_config.size()-1
 	)
 	
+	spatial_partition_grid = range(ceili(grid_width*TILE_WIDTH)/SPATIAL_PARTITION_CELL_RADIUS+1).map(
+		func(_row): return range(ceili(grid_height*TILE_HEIGHT)/SPATIAL_PARTITION_CELL_RADIUS+1).map(
+			func(_col): return Set.new()
+		)
+	)
+	
 	for x in range(grid_height):
 		evenq_grid[x] = {}
 		for y in range(grid_width):
@@ -189,6 +195,8 @@ func load_grid(a_grid_config: Array):
 			nav_region.add_child(next_terrain)
 			next_terrain.initialize(self, VU.fromXZ(HU.evenq_to_world(Vector2i(x, y))))
 			evenq_grid[x][y] = next_terrain
+			if next_terrain.structure!=null:
+				reassign_unit_in_spatial_partition(next_terrain.structure)
 
 @export var grid_config: Array
 
@@ -196,12 +204,6 @@ func _ready() -> void:
 	add_child(nav_region)
 	nav_region.set_owner(self)
 	load_grid(grid_config)
-	
-	spatial_partition_grid = range(ceili(evenq_grid.size()*TILE_WIDTH)/SPATIAL_PARTITION_CELL_RADIUS).map(
-		func(_row): return range(ceili(evenq_grid[0].size()*TILE_HEIGHT)/SPATIAL_PARTITION_CELL_RADIUS).map(
-			func(_col): return Set.new()
-		)
-	)
 
 
 ### EDITOR

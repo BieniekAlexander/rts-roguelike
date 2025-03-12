@@ -8,6 +8,7 @@ var cell: HexCell = null
 @export var cube_grid_arrangement: Array[Vector3i] = [Vector3i.ZERO]
 
 ### RESOURCES
+@onready var build_progress: float = 1
 @export var terra_provided := 0
 @export var terra_required := 0
 

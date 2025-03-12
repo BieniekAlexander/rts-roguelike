@@ -4,57 +4,52 @@ extends Command
 # TODO organize
 var projectile_scene: PackedScene = preload("res://scenes/projectiles/projectile.tscn")
 
+
+## COMMAND PRECONDITIONS
 static func requires_position() -> bool:
-	## Indicates whether this command requires a specified position to be issued
 	return true
+
+static func meets_precondition(
+	a_actor: Commandable,
+	a_message: CommandMessage
+) -> bool:
+	return _target_attackable(a_message)
 
 
 ### UTILS
-func _target_attackable() -> bool:
-	if _target == null:
-		return false
-	elif is_instance_valid(_target):
+static func _target_attackable(a_message: CommandMessage) -> bool:
+	if a_message.target==null: # fine if we're attacking empty air
 		return true
 	else:
-		return false
-
-func _target_is_in_range(a_commandable: Commandable, range: float) -> bool:
-	return (
-		(VU.inXZ(a_commandable.global_position)-VU.inXZ(_target.global_position)).length_squared()
-		- pow(a_commandable.collision_radius + _target.collision_radius, 2)
-	) < pow(max(1, range), 2)
+		return a_message.target!=null and is_instance_valid(a_message.target)
 
 
 ### STATE UPDATES
-func get_updated_state(a_commandable: Commandable):
+func get_updated_state(a_actor: Commandable):
 	## Potentially return a new command based on a state check
 	return self
 
-static func meets_precondition(a_map: Map, a_position: Vector3) -> bool:
-	## TODO I forget when this is checked
-	return true
+func should_move(a_actor: Commandable) -> bool:
+	return !_target_attackable(message) or !_target_is_in_range(a_actor, a_actor.ATTACK_RANGE)
 
-func should_move(a_commandable: Commandable) -> bool:
-	return !_target_attackable() or !_target_is_in_range(a_commandable, a_commandable.ATTACK_RANGE)
-
-func can_act(a_commandable: Commandable) -> bool:
+func can_act(a_actor: Commandable) -> bool:
 	return (
-		_target_attackable()
-		and _target!=a_commandable
-		and _target_is_in_range(a_commandable, a_commandable.ATTACK_RANGE)
-		and a_commandable.attack_timer<=0
+		_target_attackable(message)
+		and message.target!=a_actor
+		and _target_is_in_range(a_actor, a_actor.ATTACK_RANGE)
+		and a_actor.attack_timer<=0
 	)
 
-func fulfill_action(a_commandable: Commandable) -> Variant:
+func fulfill_action(a_actor: Commandable) -> Variant:
 	## Perform the command's action and return any relevant follow-up commands
-	a_commandable.attack_timer = a_commandable.ATTACK_DURATION
+	a_actor.attack_timer = a_actor.ATTACK_DURATION
 	
-	if a_commandable.ATTACK_RANGE>0:
+	if a_actor.ATTACK_RANGE>0:
 		var projectile: Projectile = projectile_scene.instantiate()
-		projectile.initialize(a_commandable.map, a_commandable.commander)
-		projectile.initialize_projectile(a_commandable, _target)
+		projectile.initialize(a_actor.map, a_actor.commander)
+		projectile.initialize_projectile(a_actor, message.target)
 	else:
-		_target.receive_damage(a_commandable, a_commandable.DAMAGE)
+		message.target.receive_damage(a_actor, a_actor.DAMAGE)
 	
 	return self
 
@@ -62,9 +57,14 @@ func is_finished() -> bool:
 	## Check whether the action should be discontinued
 	# For the basic command, if targeting a commandable, check if it still exists
 	# ref: https://forum.godotengine.org/t/distinguish-between-freed-object-and-null/3838
-	if hash(_target)==hash(null):
+	if hash(message.target)==hash(null):
 		return false
-	elif !is_instance_valid(_target):
+	elif !is_instance_valid(message.target):
 		return true
 	else:
 		return false
+
+
+## DEBUG
+func _to_string() -> String:
+	return "Attack: %s" % message.position

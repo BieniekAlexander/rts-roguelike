@@ -1,26 +1,59 @@
 class_name RTSController extends Node3D
 
-@export var selection_box: ColorRect = ColorRect.new()
+## GAME STATE
+@onready var map: Map = get_tree().current_scene.find_child("Map")
+
+
+## CAMERA
 @onready var camera: RTSCamera3D = get_viewport().get_camera_3d()
 
 
+## MOUSE
+### VISUALS
+var free_indicator = preload("res://assets/interface/indicator_free.png")
+var selection_indicator = preload("res://assets/interface/indicator_selection.png")
+var attack_indicator = preload("res://assets/interface/indicator_attack.png")
+
+### GAMESTATE
+var cursor_target: Variant = Vector3.ZERO
+var mouse_position: Vector2 = Vector2.ZERO
+
+func get_cursor_target(a_mouse_position: Vector2) -> Entity:
+	var hex_coorinate: Vector2 = VU.inXZ(camera.get_mouse_world_position(mouse_position, .5))
+	return map.get_entity_at_position(hex_coorinate)
+
+
 ## CONTROL VARIABLES
+@export var selection_box: ColorRect = ColorRect.new()
+@onready var command_message: CommandMessage = CommandMessage.new(map)
 @onready var next_command_type = Command
 @onready var next_command_additive: bool = false
-var mouse_position: Vector2 = Vector2.ZERO
+var selection: Array[Node] = []
 var select_down_position: Vector2 = Vector2.ZERO
 var selected_unit_types: Set = Set.new()
 var active_command_context: Variant = CommandContext.NULL
 
-## GAMESTATE
-@onready var map: Map = get_tree().current_scene.find_child("Map")
-var selection: Array[Node] = []
 
 ## NODE
 func _ready():
+	Input.set_custom_mouse_cursor(free_indicator)
+	
 	selection_box.visible = false
 	if !selection_box.is_inside_tree():
 		add_child(selection_box)
+		
+func _process(delta: float) -> void:
+	command_message.world_position = camera.get_mouse_world_position(mouse_position)
+	command_message.target = get_cursor_target(mouse_position)
+	
+	if command_message.target!=null:
+		Input.set_custom_mouse_cursor(
+			selection_indicator
+			if command_message.target.commander_id <= 1
+			else attack_indicator
+			)
+	else:
+		Input.set_custom_mouse_cursor(free_indicator)
 
 func _input(event: InputEvent):
 	## MOUSE MOVEMENT
@@ -62,28 +95,55 @@ func _input(event: InputEvent):
 		if active_command_context.has_method("command_class"):
 			if !active_command_context.requires_position():
 				assign_command_to_units(
-					Vector3.ZERO,
-					active_command_context,
+					active_command_context.evaluator,
+					command_message,
 					next_command_additive
 				)
 	# ISSUING COMMANDS
 	elif event.is_action_pressed("command_move"):
 		if active_command_context.has_method("command_class"):
-			if active_command_context.meets_precondition(map, camera.get_mouse_world_position(mouse_position)):
+			if active_command_context.meets_precondition(
+				map, camera.get_mouse_world_position(mouse_position)
+			):
 				assign_command_to_units(
-					camera.get_mouse_world_position(mouse_position),
-					active_command_context,
+					active_command_context.evaluator,
+					command_message,
 					next_command_additive
 				)
 		else:
 			assign_command_to_units(
-				camera.get_mouse_world_position(mouse_position),
-				active_command_context,
+				active_command_context.evaluator,
+				command_message,
 				next_command_additive
 			)
 	elif event.is_action_pressed("command_stop"):
 		cancel_command_for_units()
 		active_command_context = get_default_active_command_context(selection)
+
+
+## CONTEXT SETTING
+func get_default_active_command_context(a_commandables: Array) -> CommandContext:
+	a_commandables = a_commandables.filter(func(u): return is_instance_valid(u))
+	selected_unit_types.clear()
+	
+	for c: Commandable in a_commandables:
+		selected_unit_types.add(c.get_script())
+	
+	return selected_unit_types.map(
+		func(t): return t.get_command_context()
+	).reduce(
+		func(a, b): return CommandContext.merge(a, b),
+		CommandContext.NULL
+	)
+
+
+## SELECTION
+func deselect():
+	for c in selection:
+		if is_instance_valid(c):
+			c.set_deselected()
+	selection = []
+	selected_unit_types = Set.new()
 
 func set_selection(selection_start_position: Vector2, selection_end_position: Vector2):
 	var drag_distance = abs(selection_start_position - selection_end_position)
@@ -122,19 +182,8 @@ func set_selected_units():
 	
 	active_command_context = get_default_active_command_context(selection)
 
-func get_default_active_command_context(a_commandables: Array) -> CommandContext:
-	selected_unit_types.clear()
-	
-	for c: Commandable in a_commandables:
-		selected_unit_types.add(c.get_script())
-	
-	return selected_unit_types.map(
-		func(t): return t.get_command_context()
-	).reduce(
-		func(a, b): return CommandContext.merge(a, b),
-		CommandContext.NULL
-	)
 
+## SETTING COMMANDS
 func cancel_command_for_units() -> void:
 	var selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
 	
@@ -148,8 +197,8 @@ func cancel_command_for_units() -> void:
 		)
 
 func assign_command_to_units(
-	world_position: Vector3,
-	a_command_context: Variant,
+	a_command_evaluator: Callable,
+	a_command_message: CommandMessage,
 	add_to_queue: bool
 ) -> void:
 	var selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
@@ -157,36 +206,23 @@ func assign_command_to_units(
 	if selection.size()==0:
 		return
 	
-	var targeted_entity = map.get_entity_at_position(VU.inXZ(world_position))
-	if targeted_entity == null:
-		targeted_entity = VU.onXZ(world_position)
-	
-	var a_command_type = (
-		a_command_context.evaluator.call(selection[0], targeted_entity)
-		if a_command_context is CommandContext
-		else a_command_context
-	)
-	
-	if a_command_type != null:
-		var new_command: Command = a_command_type.new(targeted_entity)
-	
+	var a_command_type = a_command_evaluator.call(selection[0], a_command_message)
+	if a_command_type==null:
+		push_error("failed to get command - TODO account for this in the thingy")
+	else:
+		var new_command: Command = a_command_type.new(a_command_message)
+		
 		for c: Commandable in selection:
 			c.update_commands(
 				new_command,
 				add_to_queue
 			)
-	
-	if !add_to_queue:
-		next_command_type = Command
-		get_default_active_command_context(selection)
+		
+		if !add_to_queue:
+			active_command_context = get_default_active_command_context(selection)
 
-func deselect():
-	for c in selection:
-		if is_instance_valid(c):
-			c.set_deselected()
-	selection = []
-	selected_unit_types = Set.new()
 
+## UTILS
 static func get_action_names_from_event(event: InputEvent) -> Array:
 	return InputMap.get_actions().filter(
 		func(action): return "command_state" in action

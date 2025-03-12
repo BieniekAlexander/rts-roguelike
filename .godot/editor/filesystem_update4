@@ -2,5 +2,8 @@ res://scenes/scenarios/s1.tscn
 res://scripts/interface/rts_controller.gd
 res://scripts/shaders/fog.gdshader
 res://scenes/player.tscn
-res://scripts/maps/fog.gd
-res://scripts/entities/structures/structure.gd
+res://scenes/structures/mountain.tscn
+res://scenes/structures/forest.tscn
+res://scripts/interface/commands/command.gd
+res://scripts/interface/commands/attack_move.gd
+res://scripts/interface/commands/attack.gd

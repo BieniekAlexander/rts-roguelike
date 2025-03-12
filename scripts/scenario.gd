@@ -73,7 +73,7 @@ func _ready() -> void:
 	for commander in commanders:
 		players_node.add_child(commander)
 		commander.set_owner(self)
-		
+	
 	EventUtils.load_entities_from_event(init_event_config, map, commanders, false)
 	
 	for commander: Commander in commanders: # setting camera

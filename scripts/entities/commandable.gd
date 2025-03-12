@@ -6,7 +6,6 @@ extends Entity
 ### RESOURCES
 @export var hpMax: float = 100
 @onready var hp: float = hpMax
-@onready var build_progress: float = 1
 @onready var inventory: Array[Entity] = []
 @onready var inventory_capacity: int = 1
 
@@ -14,10 +13,15 @@ func receive_damage(attacker: Commandable, amount: float) -> void:
 	hp -= amount
 	
 	if hp>0 and _command==null and attacker!=null and !(_disposition==Disposition.PASSIVE):
-		update_commands(Command.new(attacker), true, true)
+		update_commands(
+				Command.new(CommandMessage.new(map, attacker, null, attacker.global_position)
+			),
+			true,
+			true
+		)
 
-static func command_evaluator_commandable(c: Commandable, target: Variant):
-	if target is Commandable and target.commander_id != c.commander_id:
+static func command_evaluator_commandable(a_actor: Commandable, a_message: CommandMessage):
+	if a_message.target!=null and a_message.target.commander_id != a_actor.commander_id:
 		return Attack
 	else:
 		return Command
@@ -25,7 +29,7 @@ static func command_evaluator_commandable(c: Commandable, target: Variant):
 ### COMMANDS
 @export var AGGRO_RANGE: float = 5
 @onready var _command: Command = null
-@onready var _fallback_command: Command = Command.new(self)
+@onready var _fallback_command: Command = Command.new(CommandMessage.new(map, self, null))
 @onready var _command_queue: Array[Command] = []
 static var commandable_command_context = CommandContext.new(
 	command_evaluator_commandable,
@@ -41,12 +45,6 @@ static func get_command_context() -> CommandContext:
 @export var ATTACK_RANGE: float = 0
 @export var ATTACK_DURATION: int = 10
 var attack_timer = 0
-
-func _target_is_in_range(target: Commandable) -> bool:
-	return (
-		(VU.inXZ(global_position)-VU.inXZ(target.global_position)).length_squared()
-		- pow(target.collision_radius + collision_radius, 2)
-	) < pow(max(1, ATTACK_RANGE) , 2)
 
 
 ### BEHAVIOR
@@ -71,7 +69,7 @@ func get_aggro_near_position(a_position: Vector2, a_range: float) -> Command:
 			and (global_position-c.global_position).length_squared() < pow(a_range, 2)
 		):
 			# TODO find the closest one, with some sort of priority
-			return Attack.new(c)
+			return Attack.new(CommandMessage.new(map, c, null))
 	
 	return null
 
@@ -117,7 +115,6 @@ func _update_state() -> void:
 		and (new_commands is Array or new_commands!=_command)
 	):
 		update_commands(new_commands, true, true)
-		#_command = new_command
 
 func _physics_process(delta: float) -> void:
 	_update_state()
@@ -134,7 +131,7 @@ func set_deselected() -> void:
 	if hp==hpMax:
 		$HPBar.visible = false
 
-func update_commands(a_commands, add_to_queue: bool = false, prepend: bool = false) -> void:
+func update_commands(a_commands: Variant, add_to_queue: bool = false, prepend: bool = false) -> void:
 	## Update the commandable's commands, accounting for queueing and arrays of commands
 	if a_commands == null:
 		_command_queue = []
@@ -147,6 +144,11 @@ func update_commands(a_commands, add_to_queue: bool = false, prepend: bool = fal
 		elif add_to_queue and !prepend:
 			_command_queue.append(a_commands)
 		else:
+			if _command!=null:
+				print(_command)
+				print(a_commands)
+				print(_command_queue)
+				print()
 			_command_queue = []
 			_command = a_commands
 	elif a_commands is Array and a_commands.size()>0:
