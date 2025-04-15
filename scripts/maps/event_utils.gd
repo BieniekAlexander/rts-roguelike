@@ -64,7 +64,7 @@ static func load_entities_from_event(
 					# TODO handle if the entities from the event don't fit
 					new_guy.initialize(a_map, commander)
 					new_guy.global_position = VU.fromXZ(
-						CollisionUtils.get_nonoverlapping_points(
+						SU.get_nonoverlapping_points(
 							a_map,
 							VU.inXZ(a_map.evenq_grid[loc.x][loc.y].global_position),
 							new_guy.collision_radius,
@@ -72,7 +72,7 @@ static func load_entities_from_event(
 						)[0]
 					)+(a_map.evenq_grid[loc.x][loc.y].global_position.y+.5)*Vector3.UP
 				
-				a_map.reassign_unit_in_spatial_partition(new_guy)
+				a_map.reassign_entity_in_spatial_partition(new_guy)
 			
 			var command = (
 				Command.load_command_from_dictionary(owner_config["command"], a_map)

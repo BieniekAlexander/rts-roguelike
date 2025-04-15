@@ -9,9 +9,9 @@ static func meets_precondition(
 	return true
 
 func can_act(a_actor: Commandable) -> bool:
-	return a_actor.global_position.distance_squared_to(message.target.global_position)<5
+	return SU.unit_is_close_to_target(a_actor, message.target)
 
 func fulfill_action(a_actor: Commandable) -> Command:
-	var repairable: Structure = message.target
+	var repairable: Structure = message.target # TODO might be repairing osmething other than a structure
 	repairable.build_progress += .01 # TODO build rate
 	return null if repairable.build_progress >= 1 else self

@@ -89,8 +89,9 @@ static func evenq_to_world(evenq: Vector2i) -> Vector2:
 	var y: float = HexCell.TILE_SIZE * sqrt(3) * (evenq.y - 0.5 * (evenq.x&1))
 	return Vector2(x, y)
 
-#### NEIGHBORS QUESTION MARK?
-static func get_evenq_neighbor_coordinates(evenq_center: Vector2i, cube_neighbor_coords: Array[Vector3i]) -> Array:
+
+#### NEIGHBORS
+static func get_evenq_neighbor_coordinates(evenq_center: Vector2i, cube_neighbor_coords: Array) -> Array:
 	return cube_neighbor_coords.map(
 		func(a): return cube_to_evenq(evenq_to_cube(evenq_center)+a)
 	)

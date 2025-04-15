@@ -1,8 +1,9 @@
+MeshInstance3D
+Line2D
+Sprite3D
 CollisionShape2D
 Node
 CharacterBody3D
-Sprite3D
-MeshInstance3D
 CollisionShape3D
 StaticBody3D
 Node3D
@@ -11,5 +12,3 @@ AnimatedSprite3D
 RichTextLabel
 Sprite2D
 Timer
-RayCast3D
-GPUParticles3D

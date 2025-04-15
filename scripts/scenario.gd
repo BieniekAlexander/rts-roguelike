@@ -79,7 +79,7 @@ func _ready() -> void:
 	for commander: Commander in commanders: # setting camera
 		if commander.has_node("Camera"):
 			for commandable: Commandable in commander.get_commandables():
-				if commandable is Core:
+				if commandable is Outpost:
 					commander.get_node("Camera").center_on_entity(commandable)
 	
 	map.nav_region.bake_navigation_mesh()

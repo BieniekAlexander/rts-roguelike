@@ -56,12 +56,13 @@ func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: i
 		cell.set_occupied(a_structure)
 		cells.add(cell)
 		
-		if a_structure is Well:
+		if a_structure is Mine:
 			cell.set_spring()
 			# TODO not a good spot for this - but I'm looking to guarantee that,
 			# if the game adds a well somewhere, it forces the tile to be a spring
 	
 	structure_cell_map[a_structure] = cells
+	a_structure.map = self
 	
 	if rebake:
 		nav_region.bake_navigation_mesh()
@@ -121,7 +122,7 @@ func get_nearby_spatial_partitions(xz_position: Vector2, radius: float) -> Set:
 	
 	return ret
 
-func reassign_unit_in_spatial_partition(a_entity: Entity) -> void:
+func reassign_entity_in_spatial_partition(a_entity: Entity) -> void:
 	var partition_coordinates_set = get_nearby_spatial_partitions(
 		VU.inXZ(a_entity.global_position),
 		a_entity.collision_radius
@@ -143,7 +144,7 @@ func reassign_entities_in_spatial_partition(entities: Array, force: bool = false
 	# NOTE: to be called each physics tick, after units have moved
 	for e: Entity in entities:
 		if e.spatial_partition_dirty or force:
-			reassign_unit_in_spatial_partition(e)
+			reassign_entity_in_spatial_partition(e)
 			e.spatial_partition_dirty = false
 
 func get_entities_at_spatial_partition(partition_index: Vector2i) -> Set:
@@ -196,7 +197,8 @@ func load_grid(a_grid_config: Array):
 			next_terrain.initialize(self, VU.fromXZ(HU.evenq_to_world(Vector2i(x, y))))
 			evenq_grid[x][y] = next_terrain
 			if next_terrain.structure!=null:
-				reassign_unit_in_spatial_partition(next_terrain.structure)
+				add_structure(next_terrain.structure, Vector2i(x, y), 0, false)
+				reassign_entity_in_spatial_partition(next_terrain.structure)
 
 @export var grid_config: Array
 

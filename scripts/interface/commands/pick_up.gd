@@ -2,10 +2,10 @@ class_name PickUp
 extends Command
 
 func should_move(a_actor: Commandable) -> bool:
-	return !_target_is_in_range(a_actor, .1)
+	return !SU.unit_is_close_to_target(a_actor, message.target)
 
 func can_act(a_actor: Commandable) -> bool:
-	return _target_is_in_range(a_actor, .1) \
+	return SU.unit_is_close_to_target(a_actor, message.target) \
 		and a_actor.inventory.size()<a_actor.inventory_capacity
 
 func fulfill_action(a_actor: Commandable) -> Command:

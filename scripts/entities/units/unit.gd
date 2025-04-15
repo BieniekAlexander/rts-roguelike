@@ -2,6 +2,13 @@
 class_name Unit
 extends Commandable
 
+## WEAPONS
+static var unit_weapon_evaluator: PatternEvaluator = PatternEvaluator.new([
+	[func(e): return true, Weapon.new(null, null, Weapon.AttackType.BALLISTIC)]
+])
+
+static func get_weapon_evaluator() -> PatternEvaluator:
+	return unit_weapon_evaluator
 
 ## COMMANDS
 @export var SPEED: float = .1
@@ -71,6 +78,9 @@ func _update_state() -> void:
 		_nav_agent.set_target_position(global_position)
 
 func _physics_process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+		
 	_update_state()
 	_update_velocity()
 
@@ -81,3 +91,13 @@ func _process(delta: float) -> void:
 		$Sprite.flip_h = true
 	elif velocity.x<0:
 		$Sprite.flip_h = false
+	elif velocity.x==0 and _command!=null:
+		$Sprite.flip_h = _command.message.position.x > global_position.x
+	
+	if $Sprite.hframes>1: # NOTE hardcoding this to get Sentry to have animation, TODO generalize
+		if attack_timer==ATTACK_DURATION:
+			$Sprite.frame = 2
+		elif _command is Attack:
+			$Sprite.frame = 1
+		else:
+			$Sprite.frame = 0

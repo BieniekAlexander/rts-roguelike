@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://d0uxj3j3rxnwi"]
 
-[ext_resource type="Script" path="res://scripts/maps/terrain/hex_cell.gd" id="1_64yu5"]
+[ext_resource type="Script" uid="uid://c80r7dslf7p5b" path="res://scripts/maps/terrain/hex_cell.gd" id="1_64yu5"]
 [ext_resource type="Texture2D" uid="uid://c4etrbjnm8d43" path="res://assets/hexagon.png" id="2_e1q41"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_787jh"]

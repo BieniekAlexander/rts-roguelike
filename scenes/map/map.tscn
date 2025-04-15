@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://brswqxlmk24kk"]
 
-[ext_resource type="Script" path="res://scripts/maps/map.gd" id="1_faupn"]
+[ext_resource type="Script" uid="uid://wvdj3itb5y7x" path="res://scripts/maps/map.gd" id="1_faupn"]
 [ext_resource type="PackedScene" uid="uid://oboscvprnct6" path="res://scenes/navigation_region.tscn" id="2_lufqe"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_fl7qw"]

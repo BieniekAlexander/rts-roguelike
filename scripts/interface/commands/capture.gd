@@ -12,13 +12,7 @@ static func meets_precondition(
 	a_actor: Commandable,
 	a_message: CommandMessage
 ) -> bool:
-	var hex_cell: HexCell = a_message.map.get_map_cell(VU.inXZ(a_message.position))
-	
-	if hex_cell.structure!=null and hex_cell.structure.commander_id!=0:
-		return true
-	else:
-		return false
-		print("failing to start cap")
+	return a_message.target is Structure and a_message.target.commander_id==0
 
 func can_act(a_actor: Commandable) -> bool:
 	return a_actor.global_position.distance_squared_to(message.position)<=5
@@ -30,7 +24,7 @@ func fulfill_action(a_actor: Commandable) -> Command:
 		return self
 	else:
 		message.target.commander = a_actor.commander
-		a_actor.commander.terra_max += message.target.terra_provided
+		a_actor.commander.population_max += message.target.population_provided
 		return null
 	
 

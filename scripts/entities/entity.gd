@@ -4,6 +4,7 @@ extends CharacterBody3D
 
 
 ### IDENTIFIERS
+var freed: bool = false
 var _commander: Commander
 var commander: Commander:
 	get: return _commander
@@ -26,6 +27,9 @@ const TEAM_COLOR_MAP: Dictionary = {
 
 
 ### COLLISION
+var xz_position: Vector2:
+	get: return VU.inXZ(global_position)
+
 var map: Map
 var pc_set: Set = Set.new()
 @onready var collider: CollisionShape3D = get_node_or_null("Collider")
@@ -72,4 +76,5 @@ func _on_death() -> void:
 	for coords: Vector2i in pc_set.get_values():
 		map.spatial_partition_grid[coords.x][coords.y].remove(self)
 	
+	freed = true # NOTE: I'm hacking this in because structures are not being recognized as freed, FIX, IDK WHY THIS IS HAPPENING, maybe physicsprocess priority?
 	queue_free()

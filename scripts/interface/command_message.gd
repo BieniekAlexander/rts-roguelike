@@ -3,7 +3,8 @@ class_name CommandMessage
 
 var map: Map				# the game map, passed for gamestate checks
 var target: Entity			# The entity which will be the recipient of the command
-var tool: Entity			# Any potential thing that is used in the fulfillment of a command
+var tool: Tool				# Any potential thing that is used in the fulfillment of a command
+							# TODO still not sure on the type for this
 var world_position: Vector3	# The raw position at which the command is requested (NOTE: `target` might not always be relevant)
 
 var position: Vector3:
@@ -15,11 +16,15 @@ var position: Vector3:
 
 
 ## NODE
-func _init(a_map: Map, a_target: Entity = null, a_tool: Entity = null, a_world_position: Vector3 = Vector3.ZERO) -> void:
+func _init(a_map: Map, a_target: Entity = null, a_tool: Tool = null, a_world_position: Vector3 = Vector3.ZERO) -> void:
 	map = a_map
 	target = a_target
 	tool = a_tool
 	world_position = a_world_position
+
+func clear() -> void:
+	target = null
+	tool = null
 
 static func deep_copy(a_message: CommandMessage) -> CommandMessage:
 	return CommandMessage.new(

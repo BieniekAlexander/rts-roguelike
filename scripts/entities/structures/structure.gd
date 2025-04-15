@@ -2,15 +2,38 @@
 class_name Structure
 extends Commandable
 
+### PROPERTIES
+var type: Type
 
 ### POSITION
-var cell: HexCell = null
-@export var cube_grid_arrangement: Array[Vector3i] = [Vector3i.ZERO]
+var cube_grid_arrangement: Array:
+	get: return StructureSpec.structure_type_spec_map[type].cube_grid_arrangement
+
+var map_cells: Set:
+	get: return map.structure_cell_map.get(self, null)
+
+static func get_arrangement_cells(
+	a_map: Map,
+	a_point: Vector2,
+	a_cube_grid_arrangement: Array
+) -> Set:
+	var center_coords: Vector2i = HU.world_to_evenq(a_point)
+	return Set.new(
+			HU.get_evenq_neighbor_coordinates(
+			center_coords,
+			a_cube_grid_arrangement
+		).map(
+			func(coords): return a_map.evenq_grid[coords.x][coords.y]
+		)
+	)
+
+static func valid_placement(a_command_message: CommandMessage) -> bool:
+	return a_command_message.map.get_map_cell(VU.inXZ(a_command_message.world_position)).structure==null
 
 ### RESOURCES
 @onready var build_progress: float = 1
-@export var terra_provided := 0
-@export var terra_required := 0
+@export var population_provided := 0
+@export var population_required := 0
 
 ### TRAINING
 @onready var training_queue: Array = []
@@ -19,7 +42,7 @@ var cell: HexCell = null
 func train(scene) -> void:
 	var unit: Unit = scene.instantiate()
 	var spawn_bias: Vector3 = (
-		(rally_command.position-global_position).normalized()
+		(rally_command.message.position-global_position).normalized()
 		if rally_command!=null
 		else Vector3.ZERO
 	)
@@ -30,13 +53,6 @@ func train(scene) -> void:
 
 ### NODE
 func _ready() -> void:
-	assert(
-	(
-		cube_grid_arrangement.size()>0 
-		and cube_grid_arrangement[0]==Vector3i.ZERO
-	),
-	"Make sure this is true for consistency")
-	
 	add_to_group("structure")
 	super()
 
@@ -58,12 +74,27 @@ func _process(delta: float) -> void:
 
 func initialize(a_map: Map, a_commander: Commander):
 	super(a_map, a_commander)
-	commander.terra_max += terra_provided
-	commander.terra_used += terra_required
+	commander.population_max += population_provided
+	commander.population_used += population_required
 
 func _on_death() -> void:
-	print(global_position)
 	map.remove_structure(self)
-	commander.terra_max -= terra_provided
-	commander.terra_used -= terra_required
+	
+	if commander!=null:
+		commander.population_max -= population_provided
+		commander.population_used -= population_required
+		
 	super()
+
+
+## ENUMERATED STRUCTURES
+# TODO use this enum to organize and persist global properties of structures before they're instantiated,
+# because I can't peek into packed scenes
+enum Type {
+	MINE,
+	DWELLING,
+	OUTPOST,
+	LAB,
+	COMPOUND,
+	ARMORY
+}

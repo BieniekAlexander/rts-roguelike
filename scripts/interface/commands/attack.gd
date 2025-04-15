@@ -1,9 +1,6 @@
 class_name Attack
 extends Command
 
-# TODO organize
-var projectile_scene: PackedScene = preload("res://scenes/projectiles/projectile.tscn")
-
 
 ## COMMAND PRECONDITIONS
 static func requires_position() -> bool:
@@ -18,10 +15,11 @@ static func meets_precondition(
 
 ### UTILS
 static func _target_attackable(a_message: CommandMessage) -> bool:
-	if a_message.target==null: # fine if we're attacking empty air
+	if a_message.target==null: # fine if we're attacking nothing
+		print("no target")
 		return true
 	else:
-		return a_message.target!=null and is_instance_valid(a_message.target)
+		return a_message.target!=null and hash(a_message.target)!=hash(null)
 
 
 ### STATE UPDATES
@@ -30,27 +28,21 @@ func get_updated_state(a_actor: Commandable):
 	return self
 
 func should_move(a_actor: Commandable) -> bool:
-	return !_target_attackable(message) or !_target_is_in_range(a_actor, a_actor.ATTACK_RANGE)
+	return !_target_attackable(message) or !SU.unit_is_close_to_target(a_actor, message.target, a_actor.ATTACK_RANGE**2)
 
 func can_act(a_actor: Commandable) -> bool:
 	return (
-		_target_attackable(message)
+		a_actor.attack_timer<=0
+		and _target_attackable(message)
 		and message.target!=a_actor
-		and _target_is_in_range(a_actor, a_actor.ATTACK_RANGE)
-		and a_actor.attack_timer<=0
+		and SU.unit_is_close_to_target(a_actor, message.target, a_actor.ATTACK_RANGE**2)
 	)
 
 func fulfill_action(a_actor: Commandable) -> Variant:
 	## Perform the command's action and return any relevant follow-up commands
 	a_actor.attack_timer = a_actor.ATTACK_DURATION
-	
-	if a_actor.ATTACK_RANGE>0:
-		var projectile: Projectile = projectile_scene.instantiate()
-		projectile.initialize(a_actor.map, a_actor.commander)
-		projectile.initialize_projectile(a_actor, message.target)
-	else:
-		message.target.receive_damage(a_actor, a_actor.DAMAGE)
-	
+	var weapon: Weapon = a_actor.get_weapon_evaluator().eval(message.target)
+	weapon.fire(a_actor, message.target)
 	return self
 
 func is_finished() -> bool:
@@ -59,7 +51,7 @@ func is_finished() -> bool:
 	# ref: https://forum.godotengine.org/t/distinguish-between-freed-object-and-null/3838
 	if hash(message.target)==hash(null):
 		return false
-	elif !is_instance_valid(message.target):
+	elif !is_instance_valid(message.target) or message.target.freed:
 		return true
 	else:
 		return false

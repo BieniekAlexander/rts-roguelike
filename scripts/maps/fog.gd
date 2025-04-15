@@ -91,4 +91,3 @@ func _ready() -> void:
 		vision_range_index_map[r] = arr.filter(
 			func(index: Vector2i): return index.length_squared()<r**2
 		)
-	print(fog_image.get_size())

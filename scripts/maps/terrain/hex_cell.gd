@@ -3,6 +3,9 @@ class_name HexCell
 extends Node3D
 
 ### SPATIAL
+var xz_position: Vector2:
+	get: return VU.inXZ(global_position)
+
 @onready var body: StaticBody3D = $StaticBody3D
 @onready var tile: Sprite3D = $Tile
 var index: Vector2i
@@ -11,8 +14,6 @@ var structure: Structure = null
 
 func set_occupied(a_structure: Structure) -> void:
 	structure = a_structure
-	structure.cell = self # TODO I realize that this will keep overwriting cell for large buildings
-	# TODO account for this - I wonder if I'll want multiple cells to be ticked
 	if body!=null: remove_child(body)
 	
 func unset_occupied() -> void:
@@ -28,7 +29,7 @@ enum TerrainType {
 }
 
 var terrain_type: TerrainType
-@onready var aqua: int = 0
+@onready var ore: int = 0
 
 # ...
 
@@ -53,12 +54,12 @@ func set_water() -> void:
 	
 func set_spring() -> void:
 	set_shallow()
-	aqua = 1500
+	ore = 1500
 	$Tile.modulate = Color(.7, .2, 1.) # TODO lazy - spring should be a shallow with extra detail
 
 
 static var terrain_scene: PackedScene = load("res://scenes/map/terrain.tscn")
-static var tree_scene: PackedScene = load("res://scenes/structures/forest.tscn")
+static var tree_scene: PackedScene = load("res://scenes/structures/dwelling.tscn")
 static var mountain_scene: PackedScene = load("res://scenes/structures/mountain.tscn")
 
 static func instantiate(config_string: String) -> HexCell:
@@ -98,9 +99,6 @@ func _ready() -> void:
 		set_spring()
 	else:
 		set_water()
-	
-	if structure!=null:
-		remove_child(body)
 	
 	scale = TILE_SIZE*.72*Vector3.ONE
 

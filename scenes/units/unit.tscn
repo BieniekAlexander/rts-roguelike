@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://blcglpbttoi64"]
 
-[ext_resource type="Script" path="res://scripts/entities/units/unit.gd" id="2_3agr1"]
+[ext_resource type="Script" uid="uid://bwer68h35vhq" path="res://scripts/entities/units/unit.gd" id="2_3agr1"]
 [ext_resource type="Texture2D" uid="uid://bayqq8wrh6ypl" path="res://assets/logo.png" id="2_tefpw"]
 [ext_resource type="Texture2D" uid="uid://bojbrs2dpggcv" path="res://assets/selection.png" id="3_uy385"]
 
@@ -24,7 +24,6 @@ gradient = SubResource("Gradient_agsmt")
 script = ExtResource("2_3agr1")
 AGGRO_RANGE = 1.0
 DAMAGE = 5.0
-sight_range = null
 
 [node name="NavigationAgent" type="NavigationAgent3D" parent="."]
 path_desired_distance = 0.5

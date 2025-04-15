@@ -25,10 +25,11 @@ var message: CommandMessage
 
 ### UTILS
 func _target_is_in_range(a_actor: Commandable, range: float) -> bool:
-	return ( # TODO account for when target is null
-		(VU.inXZ(a_actor.global_position)-VU.inXZ(message.position)).length_squared()
-		- pow(a_actor.collision_radius + message.target.collision_radius, 2)
-	) < pow(max(1, range), 2)
+	return SU.unit_is_close_to_target(
+		a_actor,
+		message.target,
+		range**2
+	)
 
 
 ### STATE UPDATES

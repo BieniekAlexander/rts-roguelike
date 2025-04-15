@@ -2,6 +2,21 @@
 class_name Commandable
 extends Entity
 
+### ATTRIBUTES
+enum Movement { GROUNDED, FLYING }
+enum Armor { LIGHT, HEAVY }
+enum Attribute { MECH, BIO, UNMANNED }
+
+@export var movement: Movement = Movement.GROUNDED
+@export var armor: Armor = Armor.LIGHT
+@export var attributes_list: Array[Attribute] = []
+var attributes: Set
+
+### WEAPON
+static var weapon_evaluator_empty: PatternEvaluator = PatternEvaluator.new([])
+
+static func get_weapon_evaluator() -> PatternEvaluator:
+	return weapon_evaluator_empty
 
 ### RESOURCES
 @export var hpMax: float = 100
@@ -21,7 +36,11 @@ func receive_damage(attacker: Commandable, amount: float) -> void:
 		)
 
 static func command_evaluator_commandable(a_actor: Commandable, a_message: CommandMessage):
-	if a_message.target!=null and a_message.target.commander_id != a_actor.commander_id:
+	if (
+		a_message.target!=null
+		and a_message.target.commander_id!=a_actor.commander_id
+		and a_actor.get_weapon_evaluator().eval(a_message.target) != null
+	):
 		return Attack
 	else:
 		return Command
@@ -31,7 +50,7 @@ static func command_evaluator_commandable(a_actor: Commandable, a_message: Comma
 @onready var _command: Command = null
 @onready var _fallback_command: Command = Command.new(CommandMessage.new(map, self, null))
 @onready var _command_queue: Array[Command] = []
-static var commandable_command_context = CommandContext.new(
+static var commandable_command_context: CommandContext = CommandContext.new(
 	command_evaluator_commandable,
 	{"command_state_attack_move": CommandContext.new(AttackMove.evaluator, {})
 })
@@ -56,11 +75,14 @@ enum Disposition {
 @onready var _disposition: Disposition = Disposition.PASSIVE
 
 func get_aggro_near_position(a_position: Vector2, a_range: float) -> Command:
+	var weapon_evaluator: PatternEvaluator = get_weapon_evaluator()
 	var entities = map.get_nearby_entities(a_position, a_range)
 	var commandables = entities.filter(func(e: Entity): return e is Commandable)
 	commandables = AU.sort_on_key(
 		func(e: Entity): return a_position.distance_squared_to(VU.inXZ(e.global_position)),
-		commandables
+		commandables.filter(
+			func(e: Entity): return weapon_evaluator.eval(e)!=null
+		)
 	)
 	
 	for c: Commandable in commandables:
@@ -79,6 +101,7 @@ func get_aggro_near_position(a_position: Vector2, a_range: float) -> Command:
 var SHOT_DURATION: int = 2
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint(): return
 	$HPBar.visible = hp<hpMax or $SelectionIndicator.visible
 	
 	if hpBarFill.visible:
@@ -93,6 +116,7 @@ func _process(delta: float) -> void:
 func _ready() -> void:
 	super()
 	add_to_group("commandable")
+	attributes = Set.new(attributes_list)
 
 func _update_state() -> void:
 	if hp <= 0:
@@ -117,6 +141,7 @@ func _update_state() -> void:
 		update_commands(new_commands, true, true)
 
 func _physics_process(delta: float) -> void:
+	if Engine.is_editor_hint(): return
 	_update_state()
 
 
@@ -144,11 +169,6 @@ func update_commands(a_commands: Variant, add_to_queue: bool = false, prepend: b
 		elif add_to_queue and !prepend:
 			_command_queue.append(a_commands)
 		else:
-			if _command!=null:
-				print(_command)
-				print(a_commands)
-				print(_command_queue)
-				print()
 			_command_queue = []
 			_command = a_commands
 	elif a_commands is Array and a_commands.size()>0:

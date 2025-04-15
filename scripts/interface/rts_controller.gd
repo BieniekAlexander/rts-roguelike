@@ -10,9 +10,22 @@ class_name RTSController extends Node3D
 
 ## MOUSE
 ### VISUALS
-var free_indicator = preload("res://assets/interface/indicator_free.png")
-var selection_indicator = preload("res://assets/interface/indicator_selection.png")
-var attack_indicator = preload("res://assets/interface/indicator_attack.png")
+const free_cursor: Resource = preload("res://assets/interface/cursor_free.png")
+const selection_cursor: Resource = preload("res://assets/interface/cursor_selection.png")
+const attack_cursor: Resource = preload("res://assets/interface/cursor_attack.png")
+const unknown_cursor: Resource = preload("res://assets/interface/cursor_unknown.png")
+const invalid_cursor: Resource = preload("res://assets/interface/cursor_invalid.png")
+
+static func cursor_evaluator(a_selection: Array, a_command_type: Script, a_command_message: CommandMessage) -> Resource:
+	if a_command_type==Command:
+		if a_command_message.target!=null:
+			return selection_cursor
+		else:
+			return free_cursor
+	elif a_command_type==Attack:
+		return attack_cursor
+	else:
+		return unknown_cursor
 
 ### GAMESTATE
 var cursor_target: Variant = Vector3.ZERO
@@ -26,17 +39,17 @@ func get_cursor_target(a_mouse_position: Vector2) -> Entity:
 ## CONTROL VARIABLES
 @export var selection_box: ColorRect = ColorRect.new()
 @onready var command_message: CommandMessage = CommandMessage.new(map)
-@onready var next_command_type = Command
 @onready var next_command_additive: bool = false
 var selection: Array[Node] = []
 var select_down_position: Vector2 = Vector2.ZERO
 var selected_unit_types: Set = Set.new()
-var active_command_context: Variant = CommandContext.NULL
+var active_command_context: CommandContext = CommandContext.NULL
+var current_command_type: Script = null
 
 
 ## NODE
 func _ready():
-	Input.set_custom_mouse_cursor(free_indicator)
+	Input.set_custom_mouse_cursor(free_cursor)
 	
 	selection_box.visible = false
 	if !selection_box.is_inside_tree():
@@ -45,15 +58,17 @@ func _ready():
 func _process(delta: float) -> void:
 	command_message.world_position = camera.get_mouse_world_position(mouse_position)
 	command_message.target = get_cursor_target(mouse_position)
+	current_command_type = active_command_context.evaluate_command(
+		selection[0] if !selection.is_empty() else null,
+		command_message
+	)
 	
-	if command_message.target!=null:
-		Input.set_custom_mouse_cursor(
-			selection_indicator
-			if command_message.target.commander_id <= 1
-			else attack_indicator
-			)
+	if current_command_type == null:
+		Input.set_custom_mouse_cursor(free_cursor)
+	elif current_command_type.meets_precondition(selection[0] if !selection.is_empty() else null, command_message):
+		Input.set_custom_mouse_cursor(cursor_evaluator(selection, current_command_type, command_message))
 	else:
-		Input.set_custom_mouse_cursor(free_indicator)
+		Input.set_custom_mouse_cursor(invalid_cursor)
 
 func _input(event: InputEvent):
 	## MOUSE MOVEMENT
@@ -84,38 +99,34 @@ func _input(event: InputEvent):
 		next_command_additive = true
 	elif event.is_action_released("command_additive"):
 		next_command_additive = false
-	## COMMAND STATE MODIFIERS
-	# TODO cleanup mapping of event to action - Godot does not make this easy
-	elif get_action_names_from_event(event).size()>0:
-		var action_name = get_action_names_from_event(event)[0]
+	## COMMAND TOOL UPDATES
+	elif get_action_names_by_prefix(event, "command_tool").size()>0:
+		# TODO I think this'll need to be a bit more complicated
+		var tool_name = get_action_names_by_prefix(event, "command_tool")[0]
+		command_message.tool = active_command_context.evaluate_tool(selection[0], tool_name)
+	## COMMAND CONTEXT UPDATES
+	elif get_action_names_by_prefix(event, "command_state").size()>0:
+		# TODO cleanup mapping of event to action - Godot does not make this easy
+		# NOTE: the call to `get_action_names_by_prefix` after the `if` is redundant
+		var action_name = get_action_names_by_prefix(event, "command_state")[0]
+		active_command_context = active_command_context.get_new_context(action_name)
 		
-		if active_command_context is CommandContext:
-			active_command_context = active_command_context.get_new_context(action_name)
-			
-		if active_command_context.has_method("command_class"):
-			if !active_command_context.requires_position():
-				assign_command_to_units(
-					active_command_context.evaluator,
-					command_message,
-					next_command_additive
-				)
-	# ISSUING COMMANDS
-	elif event.is_action_pressed("command_move"):
-		if active_command_context.has_method("command_class"):
-			if active_command_context.meets_precondition(
-				map, camera.get_mouse_world_position(mouse_position)
-			):
-				assign_command_to_units(
-					active_command_context.evaluator,
-					command_message,
-					next_command_additive
-				)
-		else:
+		if !active_command_context.requires_position():
 			assign_command_to_units(
-				active_command_context.evaluator,
+				active_command_context.evaluate_command(
+					selection[0] if !selection.is_empty() else null,
+					command_message
+				),
 				command_message,
 				next_command_additive
 			)
+	# ISSUING COMMANDS
+	elif event.is_action_pressed("command_move"):
+		assign_command_to_units(
+			current_command_type,
+			command_message,
+			next_command_additive
+		)
 	elif event.is_action_pressed("command_stop"):
 		cancel_command_for_units()
 		active_command_context = get_default_active_command_context(selection)
@@ -197,35 +208,46 @@ func cancel_command_for_units() -> void:
 		)
 
 func assign_command_to_units(
-	a_command_evaluator: Callable,
+	a_command_type: Script,
 	a_command_message: CommandMessage,
 	add_to_queue: bool
-) -> void:
+) -> bool:
+	# Returns whether or not the command was successfully assigned to any units
 	var selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
 	
 	if selection.size()==0:
-		return
+		push_error("no selections")
+		active_command_context = get_default_active_command_context(selection)
+		return false
 	
-	var a_command_type = a_command_evaluator.call(selection[0], a_command_message)
 	if a_command_type==null:
-		push_error("failed to get command - TODO account for this in the thingy")
-	else:
-		var new_command: Command = a_command_type.new(a_command_message)
+		push_error("supplied a null command")
+		active_command_context = get_default_active_command_context(selection)
+		return false
+	if not a_command_type.meets_precondition(selection[0], a_command_message):
+		push_error("This command doesn't work here!")
+		active_command_context = get_default_active_command_context(selection)
+		return false
+	
+	var new_command: Command = a_command_type.new(a_command_message)
+	
+	for c: Commandable in selection:
+		c.update_commands(
+			new_command,
+			add_to_queue
+		)
+	
+	if !add_to_queue:
+		active_command_context = get_default_active_command_context(selection)
+		command_message.clear()
 		
-		for c: Commandable in selection:
-			c.update_commands(
-				new_command,
-				add_to_queue
-			)
-		
-		if !add_to_queue:
-			active_command_context = get_default_active_command_context(selection)
+	return true
 
 
 ## UTILS
-static func get_action_names_from_event(event: InputEvent) -> Array:
+static func get_action_names_by_prefix(event: InputEvent, event_prefix: String) -> Array:
 	return InputMap.get_actions().filter(
-		func(action): return "command_state" in action
+		func(action_name: String): return event_prefix in action_name
 	).filter(
-		func(action): return event.is_action_pressed(action, true)
+		func(action_name: String): return event.is_action_pressed(action_name, true)
 	)
