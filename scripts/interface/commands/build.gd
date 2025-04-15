@@ -28,7 +28,7 @@ static func meets_precondition(a_actor: Commandable, a_message: CommandMessage) 
 			return false
 	
 	var hex_cell: HexCell = a_message.map.get_map_cell(VU.inXZ(a_message.world_position))
-	return Structure.valid_placement(a_message)
+	return StructureSpec.structure_type_spec_map[a_message.tool.type].placement_checker.call(a_message)
 
 func can_act(a_actor: Commandable) -> bool:
 	# TODO update this check such that the position is centered with respect to the build location
