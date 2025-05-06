@@ -1,13 +1,8 @@
-res://scenes/structures/dwelling.tscn
+res://scenes/player.tscn
 res://scripts/interface/rts_controller.gd
 res://scripts/shaders/fog.gdshader
-res://scripts/entities/structures/structure_spec.gd
-res://scenes/structures/mine.tscn
-res://scenes/units/vanguard.tscn
-res://scenes/units/technician.tscn
-res://scenes/units/sentry.tscn
-res://scenes/structures/outpost.tscn
-res://scenes/structures/mountain.tscn
+res://scripts/interface/static_grid_container.gd
+res://scripts/interface/hud/static_grid_button.gd
+res://scripts/interface/hud/static_grid_container.gd
 res://scenes/structures/structure.tscn
 res://scenes/structures/lab.tscn
-res://scripts/interface/commands/build.gd

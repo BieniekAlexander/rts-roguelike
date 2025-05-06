@@ -87,6 +87,14 @@ var evenq_grid_height:
 static var SPATIAL_PARTITION_CELL_RADIUS: float = 5.
 var spatial_partition_grid: Array
 
+func grid_coordinates_in_bounds(evenq_grid_coordinates: Vector2i) -> bool:
+	return (
+		evenq_grid_coordinates.x>=0
+		and evenq_grid_coordinates.x<evenq_grid_width
+		and evenq_grid_coordinates.y>=0
+		and evenq_grid_coordinates.y<evenq_grid_height
+	)
+
 func get_map_cell(point: Vector2) -> HexCell:
 	var index: Vector2i = HU.world_to_evenq(point)
 	
@@ -148,7 +156,13 @@ func reassign_entities_in_spatial_partition(entities: Array, force: bool = false
 			e.spatial_partition_dirty = false
 
 func get_entities_at_spatial_partition(partition_index: Vector2i) -> Set:
-	return spatial_partition_grid[partition_index.x][partition_index.y]
+	if (
+		partition_index.x<0 or partition_index.x>=spatial_partition_grid.size()
+		or partition_index.y<0 or partition_index.y>=spatial_partition_grid[0].size()
+	):
+		return Set.Empty
+	else:
+		return spatial_partition_grid[partition_index.x][partition_index.y]
 
 func get_entities_near_point(xz_position: Vector2) -> Set:
 	## Returns units "near" the indicated point, as interpreted from the spatial partitioning

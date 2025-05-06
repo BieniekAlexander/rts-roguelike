@@ -1,7 +1,6 @@
 class_name Command
-static func command_class():
-	pass # TODO clean this up - this was added to let me check if a class inherits Command
 
+static var command_class: bool = true
 
 ## COMMAND PRECONDITIONS
 static func requires_position() -> bool:

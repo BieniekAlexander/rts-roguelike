@@ -3,27 +3,28 @@ extends Command
 
 var build_cells: Set = null
 
-static func command_class():
-	pass # TODO clean this up - this was added to let me check if a class inherits Command
-
  # TODO refactor this - I implemented commands to potentially use Scenes as a tool,
 # and I would check the scene for the appropriate script to do some precondition checks,
 # but it doesn't look like I have any guarantees around parsing the Script from the scene,
 # so I'll just store the scnee and a reference to the script in an array and pass that around, I guess? fuck
 static var tool_selector: Dictionary = {
-	"command_tool_well": Tool.new(Structure.Type.MINE, preload("res://scenes/structures/mine.tscn")),
-	"command_tool_forest": Tool.new(Structure.Type.DWELLING, preload("res://scenes/structures/dwelling.tscn")),
-	"command_tool_core": Tool.new(Structure.Type.OUTPOST, preload("res://scenes/structures/outpost.tscn"))
+	"tool_mine": Tool.new(Structure.Type.MINE, preload("res://scenes/structures/mine.tscn")),
+	"tool_dwelling": Tool.new(Structure.Type.DWELLING, preload("res://scenes/structures/dwelling.tscn")),
+	"tool_outpost": Tool.new(Structure.Type.OUTPOST, preload("res://scenes/structures/outpost.tscn"))
 }
 
 static func meets_precondition(a_actor: Commandable, a_message: CommandMessage) -> bool:
 	if a_message.tool==null: return false
 	if !a_actor.commander.has_resources_for(a_message.tool.type): return false
-	for cell: HexCell in Structure.get_arrangement_cells(
+	var cells_to_check: Set = Structure.get_arrangement_cells(
 		a_message.map,
 		VU.inXZ(a_message.position),
 		StructureSpec.structure_type_spec_map[a_message.tool.type].cube_grid_arrangement
-	).get_values():
+	)
+	
+	if cells_to_check.is_empty(): return false
+	
+	for cell: HexCell in cells_to_check.get_values():
 		if cell.structure != null:
 			return false
 	
@@ -34,7 +35,7 @@ func can_act(a_actor: Commandable) -> bool:
 	# TODO update this check such that the position is centered with respect to the build location
 	return SU.unit_is_close_to_cells(a_actor, build_cells)
 
-func fulfill_action(a_actor: Commandable) -> Command:
+func fulfill_action(a_actor: Commandable) -> Variant:
 	var new_structure: Structure = message.tool.packed_scene.instantiate()
 	var hex_location: Vector2i = HU.world_to_evenq(VU.inXZ(message.world_position))
 	

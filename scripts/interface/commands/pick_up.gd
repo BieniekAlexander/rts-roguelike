@@ -8,7 +8,7 @@ func can_act(a_actor: Commandable) -> bool:
 	return SU.unit_is_close_to_target(a_actor, message.target) \
 		and a_actor.inventory.size()<a_actor.inventory_capacity
 
-func fulfill_action(a_actor: Commandable) -> Command:
+func fulfill_action(a_actor: Commandable) -> Variant:
 	# TODO:
 	# 1: make sure that the star is getting removed from the map in every which way
 	# 2: the anima is not interpreting any commands queued after pickup - why?

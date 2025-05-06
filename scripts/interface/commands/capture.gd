@@ -17,7 +17,7 @@ static func meets_precondition(
 func can_act(a_actor: Commandable) -> bool:
 	return a_actor.global_position.distance_squared_to(message.position)<=5
 
-func fulfill_action(a_actor: Commandable) -> Command:
+func fulfill_action(a_actor: Commandable) -> Variant:
 	message.target.build_progress += .00222222222
 	
 	if message.target.build_progress<2:

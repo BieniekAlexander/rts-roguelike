@@ -17,7 +17,19 @@ static func command_evaluator_anima(a_actor: Commandable, a_message: CommandMess
 static var anima_command_context: CommandContext = CommandContext.merge(
 	CommandContext.new(
 		FU.default_evaluate(command_evaluator_anima, Commandable.command_evaluator_commandable),
-		{"command_state_ability": CommandContext.new(Build, {})}
+		[],
+		{
+			"command_ability": CommandContext.new(
+				Build,
+				[
+					"tool_outpost",
+					"tool_dwelling",
+					"tool_armory",
+					"tool_mine"
+				],
+				{}
+			)
+		}
 	),
 	Commandable.commandable_command_context
 )

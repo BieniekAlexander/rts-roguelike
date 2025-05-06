@@ -4,8 +4,9 @@ extends Structure
 
 static var core_command_context = CommandContext.merge(
 	CommandContext.new(
-	Commandable.command_evaluator_commandable,
-	{"command_state_train": CommandContext.new(Train, {})}
+		Commandable.command_evaluator_commandable,
+		[],
+		{"command_state_train": CommandContext.new(Train, [], {})}
 	),
 	Commandable.commandable_command_context
 )

@@ -1,6 +1,6 @@
 @tool
 class_name Commander
-extends Control
+extends Node
 
 ### IDENTIFIERS
 @export_range(0, 5) var id: int
@@ -49,3 +49,7 @@ func _process(delta: float) -> void:
 			("%s/%s" % [population_used, population_max]),
 			dominion
 		])
+
+
+func _on_button_pressed() -> void:
+	print("pressed me")

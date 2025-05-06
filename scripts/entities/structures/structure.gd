@@ -18,11 +18,18 @@ static func get_arrangement_cells(
 	a_cube_grid_arrangement: Array
 ) -> Set:
 	var center_coords: Vector2i = HU.world_to_evenq(a_point)
-	return Set.new(
-			HU.get_evenq_neighbor_coordinates(
-			center_coords,
-			a_cube_grid_arrangement
-		).map(
+	var neighbor_coordinates = HU.get_evenq_neighbor_coordinates(
+		center_coords,
+		a_cube_grid_arrangement
+	)
+	
+	if neighbor_coordinates.any(
+		func(c: Vector2i): return not a_map.grid_coordinates_in_bounds(c)
+	):
+		return Set.Empty
+	else:
+		return Set.new(
+			neighbor_coordinates.map(
 			func(coords): return a_map.evenq_grid[coords.x][coords.y]
 		)
 	)

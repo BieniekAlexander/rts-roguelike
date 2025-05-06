@@ -52,8 +52,12 @@ static func command_evaluator_commandable(a_actor: Commandable, a_message: Comma
 @onready var _command_queue: Array[Command] = []
 static var commandable_command_context: CommandContext = CommandContext.new(
 	command_evaluator_commandable,
-	{"command_state_attack_move": CommandContext.new(AttackMove.evaluator, {})
-})
+	[],
+	{
+		"command_attack_move": CommandContext.new(AttackMove.evaluator),
+		"command_stop": CommandContext.new(Stop)
+	}
+)
 
 static func get_command_context() -> CommandContext:
 	return commandable_command_context

@@ -37,7 +37,6 @@ size = Vector3(0.8, 1, 1.6)
 
 [node name="Structure" type="CharacterBody3D" groups=["commandable"]]
 script = ExtResource("1_37vmy")
-sight_range = 100
 
 [node name="NavigationObstacle3D" type="NavigationObstacle3D" parent="."]
 height = 10.0

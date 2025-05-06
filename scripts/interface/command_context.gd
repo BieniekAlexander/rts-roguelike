@@ -2,28 +2,30 @@
 ## The controller interface will decide which units will receive commands as defined in this object
 class_name CommandContext
 
-var mapping: Dictionary
 var evaluator: Variant
+var applicable_tools: Array = []
+var mapping: Dictionary
 
 static var NULL: CommandContext = CommandContext.new(
-	func(commandable, target): return null, 
-	{}
+	func(commandable, target): return null
 )
 
 func _init(
 	a_evaluator: Variant,
+	a_applicable_tools: Array = [],
 	a_mapping: Dictionary = {}
 ):
 	mapping = a_mapping
+	applicable_tools = a_applicable_tools
 	evaluator = a_evaluator
 
 func requires_position() -> bool:
 	if evaluator is Callable:
 		return true
-	elif evaluator.has_method("command_class"):
+	elif "command_class" in evaluator:
 		return evaluator.requires_position()
 	else:
-		push_error("unexpected type for evaluator")
+		push_error("unexpected type for evaluator: %s" % evaluator)
 		return false
 
 func evaluate_tool(a_actor: Commandable, tool_name: String) -> Tool:
@@ -31,7 +33,7 @@ func evaluate_tool(a_actor: Commandable, tool_name: String) -> Tool:
 	if evaluator is Callable:
 		push_error("attempting to select a tool for an ambiguous command context - not implemented, and idk if I'll need to")
 		return null
-	elif evaluator.has_method("command_class"):
+	elif "command_class" in evaluator:
 		return evaluator.tool_selector.get(tool_name, null)
 	else:
 		push_error("unexpected type for evaluator")
@@ -52,8 +54,9 @@ func get_new_context(a_input_event: String) -> Variant:
 static func merge(a: CommandContext, b: CommandContext) -> CommandContext:
 	return CommandContext.new(
 		FU.default_evaluate(a.evaluator, b.evaluator),
+		a.applicable_tools+b.applicable_tools,
 		a.mapping.merged(b.mapping)
 	)
 
 func has(a_input_event: String) -> bool:
-	return mapping.has(a_input_event)
+	return mapping.has(a_input_event) or applicable_tools.has(a_input_event)

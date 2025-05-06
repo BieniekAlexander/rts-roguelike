@@ -101,3 +101,7 @@ func _init(values: Array = []) -> void:
 	
 	if !values.is_empty():
 		add_all(values)
+
+
+## CONSTANTS
+static var Empty: Set = Set.new([])

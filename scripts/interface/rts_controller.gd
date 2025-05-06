@@ -1,4 +1,4 @@
-class_name RTSController extends Node3D
+class_name RTSController extends CanvasLayer
 
 ## GAME STATE
 @onready var map: Map = get_tree().current_scene.find_child("Map")
@@ -43,18 +43,24 @@ func get_cursor_target(a_mouse_position: Vector2) -> Entity:
 var selection: Array[Node] = []
 var select_down_position: Vector2 = Vector2.ZERO
 var selected_unit_types: Set = Set.new()
-var active_command_context: CommandContext = CommandContext.NULL
 var current_command_type: Script = null
 
+var _active_command_context: CommandContext = CommandContext.NULL
+var active_command_context:
+	get: return _active_command_context
+	set(value):
+		_active_command_context = value
+		upate_hud_buttons()
 
 ## NODE
 func _ready():
 	Input.set_custom_mouse_cursor(free_cursor)
+	upate_hud_buttons()
 	
 	selection_box.visible = false
 	if !selection_box.is_inside_tree():
 		add_child(selection_box)
-		
+
 func _process(delta: float) -> void:
 	command_message.world_position = camera.get_mouse_world_position(mouse_position)
 	command_message.target = get_cursor_target(mouse_position)
@@ -70,7 +76,8 @@ func _process(delta: float) -> void:
 	else:
 		Input.set_custom_mouse_cursor(invalid_cursor)
 
-func _input(event: InputEvent):
+
+func _unhandled_input(event: InputEvent) -> void:
 	## MOUSE MOVEMENT
 	if event is InputEventMouseMotion:
 		mouse_position = event.position
@@ -99,18 +106,24 @@ func _input(event: InputEvent):
 		next_command_additive = true
 	elif event.is_action_released("command_additive"):
 		next_command_additive = false
-	## COMMAND TOOL UPDATES
-	elif get_action_names_by_prefix(event, "command_tool").size()>0:
-		# TODO I think this'll need to be a bit more complicated
-		var tool_name = get_action_names_by_prefix(event, "command_tool")[0]
-		command_message.tool = active_command_context.evaluate_tool(selection[0], tool_name)
 	## COMMAND CONTEXT UPDATES
-	elif get_action_names_by_prefix(event, "command_state").size()>0:
-		# TODO cleanup mapping of event to action - Godot does not make this easy
-		# NOTE: the call to `get_action_names_by_prefix` after the `if` is redundant
-		var action_name = get_action_names_by_prefix(event, "command_state")[0]
+	elif get_action_names_by_prefix(event, "tool_").size()>0:
+		process_action(get_action_names_by_prefix(event, "tool_")[0])
+	elif get_action_names_by_prefix(event, "command_").size()>0:
+		process_action(get_action_names_by_prefix(event, "command_")[0])
+	# ISSUING COMMANDS
+	elif event.is_action_pressed("move"):
+		assign_command_to_units(
+			current_command_type,
+			command_message,
+			next_command_additive
+		)
+
+## CONTEXT SETTING
+func process_action(action_name: String) -> void:
+	if action_name.begins_with("command_"):
 		active_command_context = active_command_context.get_new_context(action_name)
-		
+	
 		if !active_command_context.requires_position():
 			assign_command_to_units(
 				active_command_context.evaluate_command(
@@ -120,19 +133,14 @@ func _input(event: InputEvent):
 				command_message,
 				next_command_additive
 			)
-	# ISSUING COMMANDS
-	elif event.is_action_pressed("command_move"):
-		assign_command_to_units(
-			current_command_type,
-			command_message,
-			next_command_additive
+	elif action_name.begins_with("tool_"):
+		command_message.tool = active_command_context.evaluate_tool(
+			selection[0],
+			action_name
 		)
-	elif event.is_action_pressed("command_stop"):
-		cancel_command_for_units()
-		active_command_context = get_default_active_command_context(selection)
+	
+	upate_hud_buttons()
 
-
-## CONTEXT SETTING
 func get_default_active_command_context(a_commandables: Array) -> CommandContext:
 	a_commandables = a_commandables.filter(func(u): return is_instance_valid(u))
 	selected_unit_types.clear()
@@ -251,3 +259,17 @@ static func get_action_names_by_prefix(event: InputEvent, event_prefix: String) 
 	).filter(
 		func(action_name: String): return event.is_action_pressed(action_name, true)
 	)
+
+
+## HUD
+### HUD updates
+func upate_hud_buttons() -> void:
+	# TODO definitely gonna refactor
+	$CommandsView/AttackButton.visible = (active_command_context.has("command_attack_move"))
+	$CommandsView/StopButton.visible = (active_command_context.has("command_stop"))
+	$CommandsView/BuildButton.visible = (active_command_context.has("command_ability"))
+	$CommandsView/OutpostButton.visible = (active_command_context.has("tool_outpost"))
+
+### HUD signals
+func _on_control_button_pressed(control_name: String) -> void:
+	process_action(control_name)
