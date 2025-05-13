@@ -1,8 +1,11 @@
-res://scenes/player.tscn
+res://scenes/scenarios/s1.tscn
 res://scripts/interface/rts_controller.gd
 res://scripts/shaders/fog.gdshader
-res://scripts/interface/static_grid_container.gd
-res://scripts/interface/hud/static_grid_button.gd
-res://scripts/interface/hud/static_grid_container.gd
-res://scenes/structures/structure.tscn
-res://scenes/structures/lab.tscn
+res://scripts/entities/tools/tool.gd
+res://scripts/interface/commander/commander.gd
+res://scripts/entities/structures/outpost.gd
+res://scripts/interface/commander/cost_spec.gd
+res://scripts/entities/structures/structure.gd
+res://scenes/structures/compound.tscn
+res://scenes/structures/outpost.tscn
+res://scenes/structures/armory.tscn

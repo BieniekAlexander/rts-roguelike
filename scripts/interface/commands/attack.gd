@@ -9,8 +9,13 @@ static func requires_position() -> bool:
 static func meets_precondition(
 	a_actor: Commandable,
 	a_message: CommandMessage
-) -> bool:
-	return _target_attackable(a_message)
+) -> PreconditionFailureCause:
+	return (
+		PreconditionFailureCause.UNENUMERATED_FAILURE_CAUSE
+		if not _target_attackable(a_message)
+		else PreconditionFailureCause.NONE
+	)
+	
 
 
 ### UTILS

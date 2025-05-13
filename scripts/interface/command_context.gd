@@ -3,21 +3,17 @@
 class_name CommandContext
 
 var evaluator: Variant
-var applicable_tools: Array = []
 var mapping: Dictionary
-
-static var NULL: CommandContext = CommandContext.new(
-	func(commandable, target): return null
-)
+var tools: Array
 
 func _init(
 	a_evaluator: Variant,
-	a_applicable_tools: Array = [],
-	a_mapping: Dictionary = {}
+	a_mapping: Dictionary = {},
+	a_tools: Array = []
 ):
-	mapping = a_mapping
-	applicable_tools = a_applicable_tools
 	evaluator = a_evaluator
+	mapping = a_mapping
+	tools = a_tools
 
 func requires_position() -> bool:
 	if evaluator is Callable:
@@ -27,17 +23,6 @@ func requires_position() -> bool:
 	else:
 		push_error("unexpected type for evaluator: %s" % evaluator)
 		return false
-
-func evaluate_tool(a_actor: Commandable, tool_name: String) -> Tool:
-	# returns the tool with which to update the command message, to be supplied to the actor
-	if evaluator is Callable:
-		push_error("attempting to select a tool for an ambiguous command context - not implemented, and idk if I'll need to")
-		return null
-	elif "command_class" in evaluator:
-		return evaluator.tool_selector.get(tool_name, null)
-	else:
-		push_error("unexpected type for evaluator")
-		return null
 
 func evaluate_command(a_actor: Commandable, a_message: CommandMessage) -> Variant:
 	# returns the Command type that is applicable for [a_actor], given [a_message]
@@ -53,10 +38,14 @@ func get_new_context(a_input_event: String) -> Variant:
 
 static func merge(a: CommandContext, b: CommandContext) -> CommandContext:
 	return CommandContext.new(
-		FU.default_evaluate(a.evaluator, b.evaluator),
-		a.applicable_tools+b.applicable_tools,
-		a.mapping.merged(b.mapping)
+		FU.default_evaluate([a.evaluator, b.evaluator]),
+		a.mapping.merged(b.mapping),
+		Set.new(a.tools).union(Set.new(b.tools)).get_values()
 	)
 
 func has(a_input_event: String) -> bool:
-	return mapping.has(a_input_event) or applicable_tools.has(a_input_event)
+	return mapping.has(a_input_event) or tools.has(a_input_event)
+
+static var NULL: CommandContext = CommandContext.new(
+	func(commandable, target): return null
+)

@@ -3,6 +3,16 @@ class_name PatternEvaluator
 var _spec: Array = []
 var _default: Variant = null
 
+
+func eval(a_evalutor_input: Variant) -> Variant:
+	for pair in _spec:
+		if pair[0].call(a_evalutor_input):
+			return pair[1]
+	
+	push_error("Uncovered target for this interaction %s" % a_evalutor_input)
+	return _default
+
+
 func _init(a_pattern_spec: Array[Array], a_default: Variant = null) -> void:
 	# assert that pattern specs are of the format:
 	# [
@@ -15,11 +25,3 @@ func _init(a_pattern_spec: Array[Array], a_default: Variant = null) -> void:
 	
 	_spec = a_pattern_spec
 	_default = a_default
-
-func eval(a_evalutor_input: Variant) -> Variant:
-	for pair in _spec:
-		if pair[0].call(a_evalutor_input):
-			return pair[1]
-	
-	print("Uncovered target for this interaction %s" % a_evalutor_input)
-	return _default

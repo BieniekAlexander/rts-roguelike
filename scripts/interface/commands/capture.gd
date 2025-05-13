@@ -11,8 +11,12 @@ static func evaluator(a_actor: Commandable, a_message: CommandMessage) -> Varian
 static func meets_precondition(
 	a_actor: Commandable,
 	a_message: CommandMessage
-) -> bool:
-	return a_message.target is Structure and a_message.target.commander_id==0
+) -> PreconditionFailureCause:
+	return (
+		PreconditionFailureCause.NONE
+		if a_message.target is Structure and a_message.target.commander_id==0
+		else PreconditionFailureCause.UNENUMERATED_FAILURE_CAUSE
+	)
 
 func can_act(a_actor: Commandable) -> bool:
 	return a_actor.global_position.distance_squared_to(message.position)<=5

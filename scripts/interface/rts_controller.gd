@@ -46,7 +46,7 @@ var selected_unit_types: Set = Set.new()
 var current_command_type: Script = null
 
 var _active_command_context: CommandContext = CommandContext.NULL
-var active_command_context:
+var active_command_context: CommandContext:
 	get: return _active_command_context
 	set(value):
 		_active_command_context = value
@@ -69,12 +69,16 @@ func _process(delta: float) -> void:
 		command_message
 	)
 	
-	if current_command_type == null:
+	if current_command_type==null:
 		Input.set_custom_mouse_cursor(free_cursor)
-	elif current_command_type.meets_precondition(selection[0] if !selection.is_empty() else null, command_message):
-		Input.set_custom_mouse_cursor(cursor_evaluator(selection, current_command_type, command_message))
 	else:
-		Input.set_custom_mouse_cursor(invalid_cursor)
+		var check: Command.PreconditionFailureCause = current_command_type.meets_precondition(selection[0] if !selection.is_empty() else null, command_message)
+		$CommandErrorMessage.text = Command.precondition_message_map[check]
+		
+		if check==Command.PreconditionFailureCause.NONE:
+			Input.set_custom_mouse_cursor(cursor_evaluator(selection, current_command_type, command_message))
+		else:
+			Input.set_custom_mouse_cursor(invalid_cursor)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -107,10 +111,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_released("command_additive"):
 		next_command_additive = false
 	## COMMAND CONTEXT UPDATES
-	elif get_action_names_by_prefix(event, "tool_").size()>0:
-		process_action(get_action_names_by_prefix(event, "tool_")[0])
 	elif get_action_names_by_prefix(event, "command_").size()>0:
-		process_action(get_action_names_by_prefix(event, "command_")[0])
+		process_command(get_action_names_by_prefix(event, "command_")[0])
 	# ISSUING COMMANDS
 	elif event.is_action_pressed("move"):
 		assign_command_to_units(
@@ -120,23 +122,26 @@ func _unhandled_input(event: InputEvent) -> void:
 		)
 
 ## CONTEXT SETTING
-func process_action(action_name: String) -> void:
-	if action_name.begins_with("command_"):
-		active_command_context = active_command_context.get_new_context(action_name)
+func process_command(command_name: String) -> void:
+	if command_name.contains("tool"):
+		if active_command_context.has(command_name):
+			command_message.tool = Tool.command_tool_map[command_name]
+	elif command_name.begins_with("command"):
+		active_command_context = active_command_context.get_new_context(command_name)
+	else:
+		push_error("trying to process unknown action type: %s" % command_name)
+		return
 	
-		if !active_command_context.requires_position():
-			assign_command_to_units(
-				active_command_context.evaluate_command(
-					selection[0] if !selection.is_empty() else null,
-					command_message
-				),
-				command_message,
-				next_command_additive
-			)
-	elif action_name.begins_with("tool_"):
-		command_message.tool = active_command_context.evaluate_tool(
-			selection[0],
-			action_name
+	var command: Script = active_command_context.evaluate_command(
+		selection[0] if !selection.is_empty() else null,
+		command_message
+	)
+	
+	if not command.requires_position():
+		assign_command_to_units(
+			command,
+			command_message,
+			next_command_additive
 		)
 	
 	upate_hud_buttons()
@@ -232,18 +237,20 @@ func assign_command_to_units(
 		push_error("supplied a null command")
 		active_command_context = get_default_active_command_context(selection)
 		return false
-	if not a_command_type.meets_precondition(selection[0], a_command_message):
-		push_error("This command doesn't work here!")
-		active_command_context = get_default_active_command_context(selection)
-		return false
-	
-	var new_command: Command = a_command_type.new(a_command_message)
-	
-	for c: Commandable in selection:
-		c.update_commands(
-			new_command,
-			add_to_queue
-		)
+	else:
+		var check: Command.PreconditionFailureCause = a_command_type.meets_precondition(selection[0], a_command_message)
+		
+		if check!=Command.PreconditionFailureCause.NONE:
+			active_command_context = get_default_active_command_context(selection)
+			return false
+		else:
+			var new_command: Command = a_command_type.new(a_command_message)
+			
+			for c: Commandable in selection:
+				c.update_commands(
+					new_command,
+					add_to_queue
+				)
 	
 	if !add_to_queue:
 		active_command_context = get_default_active_command_context(selection)
@@ -265,11 +272,10 @@ static func get_action_names_by_prefix(event: InputEvent, event_prefix: String) 
 ### HUD updates
 func upate_hud_buttons() -> void:
 	# TODO definitely gonna refactor
-	$CommandsView/AttackButton.visible = (active_command_context.has("command_attack_move"))
-	$CommandsView/StopButton.visible = (active_command_context.has("command_stop"))
-	$CommandsView/BuildButton.visible = (active_command_context.has("command_ability"))
-	$CommandsView/OutpostButton.visible = (active_command_context.has("tool_outpost"))
+	for child: BoxContainer in $CommandsView.get_children():
+		for subchild: Button in child.get_children():
+			subchild.visible = active_command_context.has(subchild.name)
 
 ### HUD signals
 func _on_control_button_pressed(control_name: String) -> void:
-	process_action(control_name)
+	process_command(control_name)

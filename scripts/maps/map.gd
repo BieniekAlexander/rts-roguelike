@@ -11,42 +11,11 @@ const TILE_WIDTH = HexCell.TILE_SIZE*2.0
 const TILE_HORIZ = TILE_WIDTH * .75
 const TILE_HEIGHT = TILE_WIDTH * sqrt(3)/2.0
 
-#func evenq_grid_arrangement_rotated(evenq_grid_arrangement: Array[Vector2i], rotation: int) -> Array[Vector2i]:
-	#assert(rotation%60==0)
-	#if rotation%360==0: return evenq_grid_arrangement
-	#
-	#var ret: Array[Vector2i] = evenq_grid_arrangement.duplicate(true)
-	#for i in range(evenq_grid_arrangement.size()):
-		#ret[i] = HU.get_evenq_rotated(evenq_grid_arrangement[i], rotation)
-		#
-	#return ret
-#
-#func cube_grid_arrangement_rotated(cube_grid_arrangement: Array[Vector3i], rotation: int) -> Array[Vector3i]:
-	#assert(rotation%60==0)
-	#if rotation%360==0: return cube_grid_arrangement
-	#
-	#var ret: Array[Vector3i] = cube_grid_arrangement.duplicate(true)
-	#for i in range(cube_grid_arrangement.size()):
-		#ret[i] = HU.get_cube_rotated(cube_grid_arrangement[i], rotation)
-		#
-	#return ret
-
-#func is_valid_structure_position(about_coords: Vector2i, a_grid_arrangement: Array[Vector2i]) -> bool:
-	#var about_cell: HexCell = evenq_grid[about_coords.x][about_coords.y]
-	#var structure_height: float = about_cell.global_position.y #TODO maybe get level
-	#
-	#for offset: Vector2i in a_grid_arrangement:
-		#var location: Vector2i = about_coords+offset
-		#var cell: HexCell = evenq_grid[location.x][location.y]
-		#
-		#if cell.is_occupied: return false
-		#if cell.global_position.y != structure_height: return false
-	#
-	#return true
 
 func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: int, rebake: bool = true) -> void:
 	var cells: Set = Set.new()
 	a_structure.global_position = VU.fromXZ(HU.evenq_to_world(evenq_location))
+	var x_locs = []; var z_locs = []
 	
 	for location: Vector2i in HU.get_evenq_neighbor_coordinates(
 		evenq_location,
@@ -55,11 +24,18 @@ func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: i
 		var cell: HexCell = evenq_grid[location.x][location.y]
 		cell.set_occupied(a_structure)
 		cells.add(cell)
+		x_locs.append(cell.xz_position.x)
+		z_locs.append(cell.xz_position.y)
 		
 		if a_structure is Mine:
 			cell.set_spring()
 			# TODO not a good spot for this - but I'm looking to guarantee that,
 			# if the game adds a well somewhere, it forces the tile to be a spring
+	
+	# TODO maybe find better solution - guarantee that the structure's position
+	# is in the center of the cells that it's occupying
+	a_structure.global_position.x = AU.mean(x_locs)
+	a_structure.global_position.z = AU.mean(z_locs)
 	
 	structure_cell_map[a_structure] = cells
 	a_structure.map = self

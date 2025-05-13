@@ -1,12 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://b0r4m42p2r3dr"]
+[gd_scene load_steps=9 format=3 uid="uid://b0r4m42p2r3dr"]
 
 [ext_resource type="Script" uid="uid://dlfont33njutx" path="res://scripts/interface/commander/commander.gd" id="1_imw3m"]
 [ext_resource type="Script" uid="uid://ci0peslxxakbh" path="res://scripts/interface/rts_camera_3d.gd" id="2_omyur"]
 [ext_resource type="Script" uid="uid://cldm35yesp5qj" path="res://scripts/interface/rts_controller.gd" id="3_q8ke8"]
 [ext_resource type="Shader" uid="uid://du6421tshttnx" path="res://scripts/shaders/fog.gdshader" id="4_ah75o"]
 [ext_resource type="Script" uid="uid://bprkmhrqjp56k" path="res://scripts/maps/fog.gd" id="4_b3a3y"]
-[ext_resource type="Script" uid="uid://cmmxvwukr2jxk" path="res://scripts/interface/hud/static_grid_container.gd" id="4_tuyoq"]
-[ext_resource type="Script" uid="uid://dliobatb4ygrn" path="res://scripts/interface/hud/static_grid_button.gd" id="5_fjrip"]
+[ext_resource type="Script" uid="uid://b516knf7hdkun" path="res://scripts/interface/hud/command_grid.gd" id="4_fjrip"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_qcjp1"]
 
@@ -45,54 +44,32 @@ text = "	ore: 500
 	population: 0/0
 	dominion: 300"
 
-[node name="CommandsView" type="Container" parent="Controller"]
+[node name="CommandsView" type="GridContainer" parent="Controller"]
 custom_minimum_size = Vector2(60, 40)
-anchors_preset = -1
+anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_top = -120.0
 offset_right = 300.0
+offset_bottom = 16.0
 grow_vertical = 0
-script = ExtResource("4_tuyoq")
-grid_dimensions = Vector2i(5, 3)
-metadata/_custom_type_script = "uid://cmmxvwukr2jxk"
-
-[node name="AttackButton" type="Button" parent="Controller/CommandsView"]
-layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-text = "Attack"
-script = ExtResource("5_fjrip")
-grid_index = Vector2i(1, 1)
-metadata/_custom_type_script = "uid://dliobatb4ygrn"
+columns = 5
+script = ExtResource("4_fjrip")
 
-[node name="StopButton" type="Button" parent="Controller/CommandsView"]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-text = "Stop"
-script = ExtResource("5_fjrip")
-metadata/_custom_type_script = "uid://dliobatb4ygrn"
-
-[node name="BuildButton" type="Button" parent="Controller/CommandsView"]
-layout_mode = 2
-text = "Build"
-script = ExtResource("5_fjrip")
-metadata/_custom_type_script = "uid://dliobatb4ygrn"
-
-[node name="OutpostButton" type="Button" parent="Controller/CommandsView"]
-layout_mode = 2
-text = "Outpost"
-script = ExtResource("5_fjrip")
-metadata/_custom_type_script = "uid://dliobatb4ygrn"
+[node name="CommandErrorMessage" type="RichTextLabel" parent="Controller"]
+clip_contents = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1.0
+offset_bottom = 0.223991
+grow_horizontal = 0
+horizontal_alignment = 2
 
 [node name="Fog" type="MeshInstance3D" parent="."]
 transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 0, 0.5, 0)
 mesh = SubResource("PlaneMesh_qcjp1")
 surface_material_override/0 = SubResource("ShaderMaterial_2xwjn")
 script = ExtResource("4_b3a3y")
-
-[connection signal="pressed" from="Controller/CommandsView/AttackButton" to="Controller" method="_on_control_button_pressed" binds= ["command_attack_move"]]
-[connection signal="pressed" from="Controller/CommandsView/StopButton" to="Controller" method="_on_control_button_pressed" binds= ["command_stop"]]
-[connection signal="pressed" from="Controller/CommandsView/BuildButton" to="Controller" method="_on_control_button_pressed" binds= ["command_ability"]]
-[connection signal="pressed" from="Controller/CommandsView/OutpostButton" to="Controller" method="_on_control_button_pressed" binds= ["tool_outpost"]]

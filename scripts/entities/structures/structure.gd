@@ -2,12 +2,9 @@
 class_name Structure
 extends Commandable
 
-### PROPERTIES
-var type: Type
-
 ### POSITION
 var cube_grid_arrangement: Array:
-	get: return StructureSpec.structure_type_spec_map[type].cube_grid_arrangement
+	get: return StructureSpec.structure_type_spec_map.get(type, null).cube_grid_arrangement
 
 var map_cells: Set:
 	get: return map.structure_cell_map.get(self, null)
@@ -34,8 +31,20 @@ static func get_arrangement_cells(
 		)
 	)
 
-static func valid_placement(a_command_message: CommandMessage) -> bool:
-	return a_command_message.map.get_map_cell(VU.inXZ(a_command_message.world_position)).structure==null
+static func valid_placement(a_command_message: CommandMessage, a_cube_grid_arrangement: Array) -> bool:
+	var cells_to_check: Set = Structure.get_arrangement_cells(
+		a_command_message.map,
+		VU.inXZ(a_command_message.position),
+		StructureSpec.structure_type_spec_map[a_command_message.tool.type].cube_grid_arrangement
+	)
+	
+	if cells_to_check.is_empty(): return false
+	
+	for cell: HexCell in cells_to_check.get_values():
+		if cell.structure!=null:
+			return false
+			
+	return true
 
 ### RESOURCES
 @onready var build_progress: float = 1
@@ -76,15 +85,17 @@ func _process(delta: float) -> void:
 	$TrainBar.visible = !training_queue.is_empty()
 	
 	if $TrainBar.visible:
-		$TrainBar/TrainBarFill.scale.x = float(training_queue[0])/450 # TODO remove hardcode, sooo lazy
+		$TrainBar/TrainBarFill.scale.x = float(training_queue[0][0])/450 # TODO remove hardcode, sooo lazy
 		$TrainBar/TrainBarFill.position.x = -scale.x * (1-$TrainBar/TrainBarFill.scale.x)
 
 func initialize(a_map: Map, a_commander: Commander):
 	super(a_map, a_commander)
+	a_commander.add_structure(self)
 	commander.population_max += population_provided
 	commander.population_used += population_required
 
 func _on_death() -> void:
+	commander.remove_structure(self)
 	map.remove_structure(self)
 	
 	if commander!=null:
@@ -92,16 +103,3 @@ func _on_death() -> void:
 		commander.population_used -= population_required
 		
 	super()
-
-
-## ENUMERATED STRUCTURES
-# TODO use this enum to organize and persist global properties of structures before they're instantiated,
-# because I can't peek into packed scenes
-enum Type {
-	MINE,
-	DWELLING,
-	OUTPOST,
-	LAB,
-	COMPOUND,
-	ARMORY
-}

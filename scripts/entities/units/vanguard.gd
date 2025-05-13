@@ -2,14 +2,6 @@
 class_name Vanguard
 extends Unit
 
-## WEAPONS
-static var vanguard_weapon_evaluator: PatternEvaluator = PatternEvaluator.new([
-	[(func(e): return true), Weapon.new(null, null, Weapon.AttackType.LAZER)]
-])
-
-static func get_weapon_evaluator() -> PatternEvaluator:
-	return vanguard_weapon_evaluator
-
 
 ## NODE
 func _process(delta: float) -> void:
@@ -27,3 +19,12 @@ func _process(delta: float) -> void:
 		$Lazer.set_visible(true)
 	else:
 		$Lazer.set_visible(false)
+
+
+## WEAPONS
+static var vanguard_weapon_evaluator: PatternEvaluator = PatternEvaluator.new([
+	[(func(e): return true), Weapon.new(null, null, Weapon.AttackType.LAZER)]
+])
+
+static func get_weapon_evaluator() -> PatternEvaluator:
+	return vanguard_weapon_evaluator

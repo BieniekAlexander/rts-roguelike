@@ -3,6 +3,25 @@ class_name Command
 static var command_class: bool = true
 
 ## COMMAND PRECONDITIONS
+static func get_valid_tool_names() -> Array:
+	return []
+
+enum PreconditionFailureCause {
+	NONE,
+	NOT_ENOUGH_RESOURCES,
+	TECHNOLOGY_NOT_AVAILABLE,
+	INVALID_PLACEMENT,
+	UNENUMERATED_FAILURE_CAUSE
+}
+
+static var precondition_message_map: Dictionary = {
+	PreconditionFailureCause.NONE: "",
+	PreconditionFailureCause.NOT_ENOUGH_RESOURCES: "Not enough resources",
+	PreconditionFailureCause.TECHNOLOGY_NOT_AVAILABLE: "Technology not available",
+	PreconditionFailureCause.INVALID_PLACEMENT: "Invalid Placement",
+	PreconditionFailureCause.UNENUMERATED_FAILURE_CAUSE: "Unspecified failure"
+}
+
 static func requires_position() -> bool:
 	## Indicates whether this command requires a specified position to be issued
 	return true
@@ -10,12 +29,12 @@ static func requires_position() -> bool:
 static func meets_precondition(
 	a_actor: Commandable,
 	a_message: CommandMessage
-) -> bool:
+) -> PreconditionFailureCause:
 	## Checks whether the relevant command is allowable, given the situation
 	# examples:
 	# - can the unit can perform this operation on the specified target?
 	# - can the unit can place the specified building in the specified position?
-	return true
+	return PreconditionFailureCause.NONE
 
 
 ### STATE

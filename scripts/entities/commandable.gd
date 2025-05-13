@@ -34,33 +34,36 @@ func receive_damage(attacker: Commandable, amount: float) -> void:
 			true,
 			true
 		)
-
-static func command_evaluator_commandable(a_actor: Commandable, a_message: CommandMessage):
-	if (
+		
+static func command_evaluator_commandable(a_actor: Commandable, a_message: CommandMessage) -> Script:
+	return Attack if (
 		a_message.target!=null
 		and a_message.target.commander_id!=a_actor.commander_id
 		and a_actor.get_weapon_evaluator().eval(a_message.target) != null
-	):
-		return Attack
-	else:
-		return Command
+	) else Command
+
+#static var commandable_command_context: CommandContext = CommandContext.new(
+		#command_evaluator_commandable,
+		#{
+			#"command_attack_move": CommandContext.new(AttackMove.evaluator),
+			#"command_stop": CommandContext.new(Stop)
+		#}
+	#)
+
+static func get_command_context() -> CommandContext:
+	return CommandContext.new(
+		command_evaluator_commandable,
+		{
+			"command_attack_move": CommandContext.new(AttackMove.evaluator),
+			"command_stop": CommandContext.new(Stop)
+		}
+	)
 
 ### COMMANDS
 @export var AGGRO_RANGE: float = 5
 @onready var _command: Command = null
 @onready var _fallback_command: Command = Command.new(CommandMessage.new(map, self, null))
 @onready var _command_queue: Array[Command] = []
-static var commandable_command_context: CommandContext = CommandContext.new(
-	command_evaluator_commandable,
-	[],
-	{
-		"command_attack_move": CommandContext.new(AttackMove.evaluator),
-		"command_stop": CommandContext.new(Stop)
-	}
-)
-
-static func get_command_context() -> CommandContext:
-	return commandable_command_context
 
 
 ### ATTACK

@@ -7,29 +7,30 @@ var build_cells: Set = null
 # and I would check the scene for the appropriate script to do some precondition checks,
 # but it doesn't look like I have any guarantees around parsing the Script from the scene,
 # so I'll just store the scnee and a reference to the script in an array and pass that around, I guess? fuck
-static var tool_selector: Dictionary = {
-	"tool_mine": Tool.new(Structure.Type.MINE, preload("res://scenes/structures/mine.tscn")),
-	"tool_dwelling": Tool.new(Structure.Type.DWELLING, preload("res://scenes/structures/dwelling.tscn")),
-	"tool_outpost": Tool.new(Structure.Type.OUTPOST, preload("res://scenes/structures/outpost.tscn"))
-}
+static var build_tool_names: Array = [
+	"command_tool_outpost",
+	"command_tool_dwelling",
+	"command_tool_mine",
+	"command_tool_lab",
+	"command_tool_compound",
+	"command_tool_armory"
+]
 
-static func meets_precondition(a_actor: Commandable, a_message: CommandMessage) -> bool:
-	if a_message.tool==null: return false
-	if !a_actor.commander.has_resources_for(a_message.tool.type): return false
-	var cells_to_check: Set = Structure.get_arrangement_cells(
-		a_message.map,
-		VU.inXZ(a_message.position),
+static func get_valid_tool_names() -> Array:
+	return build_tool_names
+
+static func meets_precondition(a_actor: Commandable, a_message: CommandMessage) -> PreconditionFailureCause:
+	if a_message.tool==null:
+		return PreconditionFailureCause.UNENUMERATED_FAILURE_CAUSE
+	elif not a_actor.commander.has_resources_for(a_message.tool.type):
+		return PreconditionFailureCause.NOT_ENOUGH_RESOURCES
+	elif not StructureSpec.structure_type_spec_map[a_message.tool.type].placement_checker.call(
+		a_message,
 		StructureSpec.structure_type_spec_map[a_message.tool.type].cube_grid_arrangement
-	)
-	
-	if cells_to_check.is_empty(): return false
-	
-	for cell: HexCell in cells_to_check.get_values():
-		if cell.structure != null:
-			return false
-	
-	var hex_cell: HexCell = a_message.map.get_map_cell(VU.inXZ(a_message.world_position))
-	return StructureSpec.structure_type_spec_map[a_message.tool.type].placement_checker.call(a_message)
+	):
+		return PreconditionFailureCause.INVALID_PLACEMENT
+	else:
+		return PreconditionFailureCause.NONE
 
 func can_act(a_actor: Commandable) -> bool:
 	# TODO update this check such that the position is centered with respect to the build location

@@ -4,6 +4,25 @@ extends CharacterBody3D
 
 
 ### IDENTIFIERS
+
+
+#### TYPE ENUMERATION
+# I need to enumerate because I can't peek into packed scenes
+@export var type: Type
+
+enum Type {
+	UNDEFINED=-1,
+	STRUCTURE_MINE,
+	STRUCTURE_DWELLING,
+	STRUCTURE_OUTPOST,
+	STRUCTURE_LAB,
+	STRUCTURE_COMPOUND,
+	STRUCTURE_ARMORY,
+	UNIT_TECHNICIAN,
+	UNIT_SENTRY,
+	UNIT_VANGUARD
+}
+
 var freed: bool = false
 var _commander: Commander
 var commander: Commander:

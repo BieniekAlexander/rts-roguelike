@@ -4,9 +4,9 @@ extends Command
 static func meets_precondition(
 	a_actor: Commandable,
 	a_message: CommandMessage
-) -> bool:
+) -> Command.PreconditionFailureCause:
 	# TODO this should only be performable by certain units
-	return true
+	return PreconditionFailureCause.NONE
 
 func can_act(a_actor: Commandable) -> bool:
 	return SU.unit_is_close_to_target(a_actor, message.target)
