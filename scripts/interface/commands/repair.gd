@@ -5,7 +5,6 @@ static func meets_precondition(
 	a_actor: Commandable,
 	a_message: CommandMessage
 ) -> Command.PreconditionFailureCause:
-	# TODO this should only be performable by certain units
 	return PreconditionFailureCause.NONE
 
 func can_act(a_actor: Commandable) -> bool:

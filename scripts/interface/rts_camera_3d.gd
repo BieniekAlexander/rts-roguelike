@@ -12,9 +12,9 @@ var move_reference_position: Vector2
 @export var rotate_left_action: String = "isometric_camera_rotate_left"
 @export var rotate_right_action: String = "isometric_camera_rotate_right"
 
-func center_on_entity(entity: Entity) -> void:
+func center_on_position(position: Vector3) -> void:
 	# TODO offset camera position based on height - because the camera is angled, the camera won't be pointing at the entity
-	global_position = global_position.y*Vector3.UP + VU.onXZ(entity.global_position)
+	global_position = global_position.y*Vector3.UP + VU.onXZ(position)
 
 ### ZOOM
 @export_category("Zoom")

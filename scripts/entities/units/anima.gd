@@ -8,7 +8,7 @@ static func command_evaluator_anima(a_actor: Commandable, a_message: CommandMess
 	elif (
 		!a_actor.inventory.is_empty() 
 		and a_actor.inventory[0] is Star
-		and a_message.target is Outpost
+		and a_message.target.type==Entity.Type.STRUCTURE_OUTPOST
 	):
 		return DropOff
 	else:

@@ -28,7 +28,7 @@ func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: i
 		z_locs.append(cell.xz_position.y)
 		
 		if a_structure is Mine:
-			cell.set_spring()
+			cell.set_deposit()
 			# TODO not a good spot for this - but I'm looking to guarantee that,
 			# if the game adds a well somewhere, it forces the tile to be a spring
 	
@@ -148,7 +148,7 @@ func get_entities_near_point(xz_position: Vector2) -> Set:
 
 
 ### MOVEMENT AND COLLISION
-var units: Array: # TODO check
+var units: Array:
 	get: return get_tree().get_nodes_in_group("commandable").filter(func(c: Commandable): return c is Unit)
 
 func get_entity_at_position(xz_position: Vector2) -> Entity:

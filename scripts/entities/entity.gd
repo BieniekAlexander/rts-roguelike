@@ -72,8 +72,6 @@ func get_collision_extents() -> Array[Vector2]:
 
 var collision_radius: float:
 	get:
-		# TODO remove this stupid Structure check
-		# I have to revisit Structure colliders
 		var shape = $Collider.shape
 		if shape is SphereShape3D: return shape.radius
 		elif shape is BoxShape3D: return max(shape.size.x, shape.size.z)

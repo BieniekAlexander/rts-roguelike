@@ -3,10 +3,7 @@ extends Command
 
 var build_cells: Set = null
 
- # TODO refactor this - I implemented commands to potentially use Scenes as a tool,
-# and I would check the scene for the appropriate script to do some precondition checks,
-# but it doesn't look like I have any guarantees around parsing the Script from the scene,
-# so I'll just store the scnee and a reference to the script in an array and pass that around, I guess? fuck
+
 static var build_tool_names: Array = [
 	"command_tool_outpost",
 	"command_tool_dwelling",

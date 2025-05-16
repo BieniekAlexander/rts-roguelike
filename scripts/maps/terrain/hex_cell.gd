@@ -40,7 +40,7 @@ var terrain_type: TerrainType
 func get_config() -> String:
 	return "C"
 
-func set_grass() -> void:
+func set_ground() -> void:
 	$Tile.modulate = Color(.398, .54, .265)
 	body.collision_layer = 1<<4
 
@@ -52,10 +52,10 @@ func set_water() -> void:
 	$Tile.modulate = Color(.255, .31, .937)
 	body.collision_layer = 1<<5
 	
-func set_spring() -> void:
-	set_shallow()
+func set_deposit() -> void:
+	set_ground()
 	ore = 1500
-	$Tile.modulate = Color(.7, .2, 1.) # TODO lazy - spring should be a shallow with extra detail
+	$Tile.modulate = Color(.7, .2, 1.)
 
 
 static var terrain_scene: PackedScene = load("res://scenes/map/terrain.tscn")
@@ -92,11 +92,11 @@ static func instantiate(config_string: String) -> HexCell:
 ### NODE
 func _ready() -> void:
 	if terrain_type==TerrainType.GRASS:
-		set_grass()
+		set_ground()
 	elif terrain_type==TerrainType.SHALLOW:
 		set_shallow()
 	elif terrain_type==TerrainType.SPRING:
-		set_spring()
+		set_deposit()
 	else:
 		set_water()
 	

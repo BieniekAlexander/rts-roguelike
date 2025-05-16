@@ -4,7 +4,6 @@ class_name CommandMessage
 var map: Map				# the game map, passed for gamestate checks
 var target: Entity			# The entity which will be the recipient of the command
 var tool: Tool				# Any potential thing that is used in the fulfillment of a command
-							# TODO still not sure on the type for this
 var world_position: Vector3	# The raw position at which the command is requested (NOTE: `target` might not always be relevant)
 
 var position: Vector3:

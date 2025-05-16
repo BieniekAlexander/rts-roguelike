@@ -97,7 +97,7 @@ func get_aggro_near_position(a_position: Vector2, a_range: float) -> Command:
 			c.commander_id>0 and c.commander_id != commander_id
 			and (global_position-c.global_position).length_squared() < pow(a_range, 2)
 		):
-			# TODO find the closest one, with some sort of priority
+			# TODO I believe `AttackMove` is never finding any `Structure`s because the `Structure`s don't have colliders
 			return Attack.new(CommandMessage.new(map, c, null))
 	
 	return null

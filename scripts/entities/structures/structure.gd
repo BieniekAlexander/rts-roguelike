@@ -51,6 +51,25 @@ static func valid_placement(a_command_message: CommandMessage, a_cube_grid_arran
 @export var population_provided := 0
 @export var population_required := 0
 
+### COMMANDS
+static func command_evaluator_structure(a_actor: Commandable, a_message: CommandMessage):
+	if a_message.tool!=null:
+		return Train
+	else:
+		return Command
+
+static var structure_command_context: CommandContext = CommandContext.merge(
+	CommandContext.new(
+		command_evaluator_structure,
+		{},
+		Train.get_valid_tool_names()
+	),
+	Commandable.get_command_context()
+)
+
+static func get_command_context() -> CommandContext:
+	return structure_command_context
+
 ### TRAINING
 @onready var training_queue: Array = []
 @onready var rally_command: Command = null
@@ -75,9 +94,28 @@ func _ready() -> void:
 func _update_state() -> void:
 	super()
 	
-	if _command!=null and _command.get_script()==Command:
-		rally_command = _command
-		_command = null
+	if !training_queue.is_empty():
+		training_queue[0][0] -= 1 # NOTE remove hardcode, as below
+		
+		if training_queue[0][0]<=0:  # NOTE remove hardcode, as below
+			var spec: Variant = training_queue.pop_front()
+			train(spec[1])
+			
+	
+	if _command != null:
+		if _command.get_script()==Command:
+			rally_command = _command
+			_command = null
+		elif _command is Train:
+			if commander.has_resources_for(_command.message.tool.type):
+				training_queue.push_back([ # TODO remove hardcode
+					commander.technology_mapping[_command.message.tool.type].creation_time,
+					_command.message.tool.packed_scene
+				])
+				
+				commander.use_resources_for(_command.message.tool.type)
+			
+			_command = null
 
 func _process(delta: float) -> void:
 	super(delta)
