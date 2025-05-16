@@ -8,3 +8,10 @@ res://scenes/structures/outpost.tscn
 res://scripts/entities/structures/structure.gd
 res://scripts/scenario.gd
 res://scripts/entities/units/anima.gd
+res://scripts/utils/evaluator.gd
+res://scripts/entities/tools/weapon.gd
+res://scripts/entities/units/vanguard.gd
+res://scripts/entities/units/unit.gd
+res://scripts/entities/commandable.gd
+res://scripts/entities/tools/projectile.gd
+res://scripts/interface/commands/attack.gd

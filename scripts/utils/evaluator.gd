@@ -1,27 +1,22 @@
-class_name PatternEvaluator
+class_name Pattern
 
-var _spec: Array = []
-var _default: Variant = null
+var condition: Callable
+var result: Variant
 
-
-func eval(a_evalutor_input: Variant) -> Variant:
-	for pair in _spec:
-		if pair[0].call(a_evalutor_input):
-			return pair[1]
+static func eval(
+	a_patterns: Array,
+	a_evalution_input: Variant,
+	a_default: Variant = null
+) -> Variant:
+	for pattern: Pattern in a_patterns:
+		if pattern.condition.call(a_evalution_input):
+			return pattern.result
 	
-	push_error("Uncovered target for this interaction %s" % a_evalutor_input)
-	return _default
+	push_error("Uncovered target for this interaction %s" % a_evalution_input)
+	return a_default
 
 
-func _init(a_pattern_spec: Array[Array], a_default: Variant = null) -> void:
-	# assert that pattern specs are of the format:
-	# [
-	#	[evaluator_callable, Variant]
-	# ]
-	assert(
-		a_pattern_spec.all(func(p): return p.size()==2 and p[0] is Callable and p[1] is Variant),
-		"malformed pattern spec"
-	)
-	
-	_spec = a_pattern_spec
-	_default = a_default
+func _init(a_condition: Callable, a_result: Variant) -> void:
+	# A tuple which pairs a condition with a potential result, to be returned if the condition is true
+	condition = a_condition
+	result = a_result

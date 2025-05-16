@@ -27,7 +27,7 @@ func _physics_process(delta: float) -> void:
 				if not is_instance_valid(source): source = null
 				body.receive_damage(
 					source,
-					Weapon.damage_multiplier_evaluators[attack_type].eval(body)*source.DAMAGE
+					Weapon.damage_multiplier_patterns[attack_type].eval(body)*source.DAMAGE
 				)
 				body.receive_damage(source, damage)
 		

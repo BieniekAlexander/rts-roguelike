@@ -22,9 +22,9 @@ func _process(delta: float) -> void:
 
 
 ## WEAPONS
-static var vanguard_weapon_evaluator: PatternEvaluator = PatternEvaluator.new([
-	[(func(e): return true), Weapon.new(null, null, Weapon.AttackType.LAZER)]
-])
+static var vanguard_weapon_patterns: Array[Pattern] = [
+	Pattern.new(func(e): return true, Weapon.new(null, null, Weapon.AttackType.LAZER))
+]
 
-static func get_weapon_evaluator() -> PatternEvaluator:
-	return vanguard_weapon_evaluator
+static func get_weapon_evaluation_patterns() -> Array:
+	return vanguard_weapon_patterns

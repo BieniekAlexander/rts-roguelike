@@ -13,21 +13,15 @@ enum AttackType {
 	EXPLOSIVE
 }
 
-static var damage_multiplier_evaluators: Dictionary = {
-	AttackType.BALLISTIC: PatternEvaluator.new(
-		[
-			[func(c: Commandable): return c.armor==Commandable.Armor.LIGHT, 1],
-			[func(c: Commandable): return c.armor==Commandable.Armor.HEAVY, .1]
-		],
-		1
-	),
-	AttackType.LAZER: PatternEvaluator.new(
-		[
-			[func(c: Commandable): return c.armor==Commandable.Armor.LIGHT, .25],
-			[func(c: Commandable): return c.armor==Commandable.Armor.HEAVY, 1]
-		],
-		1
-	)
+static var damage_multiplier_patterns: Dictionary = {
+	AttackType.BALLISTIC: [
+			Pattern.new(func(c: Commandable): return c.armor==Commandable.Armor.LIGHT, 1),
+			Pattern.new(func(c: Commandable): return c.armor==Commandable.Armor.HEAVY, .1)
+	],
+	AttackType.LAZER: [
+			Pattern.new(func(c: Commandable): return c.armor==Commandable.Armor.LIGHT, .25),
+			Pattern.new(func(c: Commandable): return c.armor==Commandable.Armor.HEAVY, 1)
+	]
 }
 
 
@@ -42,7 +36,7 @@ func fire(a_owner: Commandable, a_target: Entity) -> void:
 	else:
 		a_target.receive_damage(
 			a_owner,
-			damage_multiplier_evaluators[attack_type].eval(a_target)*a_owner.DAMAGE
+			Pattern.eval(damage_multiplier_patterns[attack_type], a_target)*a_owner.DAMAGE
 		)
 
 

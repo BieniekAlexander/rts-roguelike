@@ -13,10 +13,10 @@ enum Attribute { MECH, BIO, UNMANNED }
 var attributes: Set
 
 ### WEAPON
-static var weapon_evaluator_empty: PatternEvaluator = PatternEvaluator.new([])
+static var weapon_patterns_empty: Array[Pattern] = []
 
-static func get_weapon_evaluator() -> PatternEvaluator:
-	return weapon_evaluator_empty
+static func get_weapon_evaluation_patterns() -> Array[Pattern]:
+	return weapon_patterns_empty
 
 ### RESOURCES
 @export var hpMax: float = 100
@@ -39,7 +39,7 @@ static func command_evaluator_commandable(a_actor: Commandable, a_message: Comma
 	return Attack if (
 		a_message.target!=null
 		and a_message.target.commander_id!=a_actor.commander_id
-		and a_actor.get_weapon_evaluator().eval(a_message.target) != null
+		and Pattern.eval(a_actor.get_weapon_evaluation_patterns(), a_message.target) != null
 	) else Command
 
 #static var commandable_command_context: CommandContext = CommandContext.new(
@@ -82,13 +82,13 @@ enum Disposition {
 @onready var _disposition: Disposition = Disposition.PASSIVE
 
 func get_aggro_near_position(a_position: Vector2, a_range: float) -> Command:
-	var weapon_evaluator: PatternEvaluator = get_weapon_evaluator()
+	var weapon_patterns: Array[Pattern] = get_weapon_evaluation_patterns()
 	var entities = map.get_nearby_entities(a_position, a_range)
 	var commandables = entities.filter(func(e: Entity): return e is Commandable)
 	commandables = AU.sort_on_key(
 		func(e: Entity): return a_position.distance_squared_to(VU.inXZ(e.global_position)),
 		commandables.filter(
-			func(e: Entity): return weapon_evaluator.eval(e)!=null
+			func(e: Entity): return Pattern.eval(weapon_patterns, e)!=null
 		)
 	)
 	
