@@ -2,6 +2,31 @@
 class_name Vanguard
 extends Unit
 
+### COMMANDS
+static var vanguard_command_context: CommandContext = CommandContext.merge(
+	CommandContext.new(
+		[
+			Pattern.new(
+				func(a): return (
+					a[1].target is Lab
+				), Collect
+			)
+		],
+		{
+			"command_launch": CommandContext.new(
+				[
+					Pattern.new(func(a): return true, Launch)
+				],
+				{}
+			)
+		}
+	),
+	Commandable.get_command_context()
+)
+
+static func get_command_context() -> CommandContext:
+	return vanguard_command_context
+
 
 ## NODE
 func _process(delta: float) -> void:

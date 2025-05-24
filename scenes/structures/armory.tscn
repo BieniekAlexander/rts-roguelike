@@ -9,7 +9,7 @@ armor = 1
 hpMax = 500.0
 AGGRO_RANGE = 1.0
 ATTACK_DURATION = 0
-type = 5
+type = 4613
 sight_range = 10
 
 [node name="NavigationObstacle3D" parent="." index="0"]

@@ -20,20 +20,21 @@ static func meets_precondition(
 
 ### UTILS
 static func _target_attackable(a_message: CommandMessage) -> bool:
-	if a_message.target==null: # fine if we're attacking nothing
-		print("no target")
-		return true
-	else:
-		return a_message.target!=null and hash(a_message.target)!=hash(null)
-
+	# TODO make it possible for units to attack the floor - unfortunately,
+	# I previously wrote this such that a_message.target==null => the floor should be attacked,
+	# but a_message.target becomes nul when a target dies, so checking it in that manner
+	# causes this to always return true, even if the target used to be an object,
+	# causing downstream checks to crash
+	return is_instance_valid(a_message.target)
+ 
 
 ### STATE UPDATES
 func get_updated_state(a_actor: Commandable):
 	## Potentially return a new command based on a state check
-	return self
+	return null if hash(message.target)==hash(null) else self
 
 func should_move(a_actor: Commandable) -> bool:
-	return !_target_attackable(message) or !SU.unit_is_close_to_target(a_actor, message.target, a_actor.ATTACK_RANGE**2)
+	return not (_target_attackable(message) and SU.unit_is_close_to_target(a_actor, message.target, a_actor.ATTACK_RANGE**2))
 
 func can_act(a_actor: Commandable) -> bool:
 	return (
@@ -49,17 +50,6 @@ func fulfill_action(a_actor: Commandable) -> Variant:
 	var weapon: Weapon = Pattern.eval(a_actor.get_weapon_evaluation_patterns(), message.target)
 	weapon.fire(a_actor, message.target)
 	return self
-
-func is_finished() -> bool:
-	## Check whether the action should be discontinued
-	# For the basic command, if targeting a commandable, check if it still exists
-	# ref: https://forum.godotengine.org/t/distinguish-between-freed-object-and-null/3838
-	if hash(message.target)==hash(null):
-		return false
-	elif !is_instance_valid(message.target) or message.target.freed:
-		return true
-	else:
-		return false
 
 
 ## DEBUG

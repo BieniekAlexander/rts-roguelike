@@ -8,6 +8,7 @@ attributes_list = Array[int]([1])
 hpMax = 70.0
 AGGRO_RANGE = 8.0
 ATTACK_RANGE = 6.0
+type = 4353
 sight_range = 10
 
 [node name="Sprite" parent="." index="2"]

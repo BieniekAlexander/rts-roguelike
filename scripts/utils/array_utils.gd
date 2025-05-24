@@ -21,7 +21,15 @@ static func priority_queue_push(a_key: Callable, a_item: Variant, a_queue: Array
 			return i
 	
 	a_queue.append(a_item)
-	return a_queue.size()-1 
+	return a_queue.size()-1
+	
+static func concat(a1: Array, a2: Array) -> Array:
+	var ret: Array = a1.duplicate()
+	
+	for item in a2:
+		ret.append(item)
+	
+	return ret
 
 ## Statistics
 static func sum(a_array: Array) -> float:

@@ -1,5 +1,8 @@
 {
 	"owners": {
+		"0": {
+			"entities": []
+		},
 		"1": {
 			"entities": [
 				{"loc": [4, 22], "res": "res://scenes/structures/outpost.tscn"},

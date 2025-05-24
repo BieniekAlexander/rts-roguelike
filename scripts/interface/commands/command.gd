@@ -3,9 +3,6 @@ class_name Command
 static var command_class: bool = true
 
 ## COMMAND PRECONDITIONS
-static func get_valid_tool_names() -> Array:
-	return []
-
 enum PreconditionFailureCause {
 	NONE,
 	NOT_ENOUGH_RESOURCES,
@@ -22,15 +19,19 @@ static var precondition_message_map: Dictionary = {
 	PreconditionFailureCause.UNENUMERATED_FAILURE_CAUSE: "Unspecified failure"
 }
 
+static func tool_applies_to(command_tool_name: String, entity_type: Entity.Type):
+	# TODO implement some means of checking if a given tool even applies for a given unit type, e.g. who can build what
+	return false
+
 static func requires_position() -> bool:
 	## Indicates whether this command requires a specified position to be issued
 	return true
 
+## Checks whether the relevant command is allowable, given the situation
 static func meets_precondition(
 	a_actor: Commandable,
 	a_message: CommandMessage
 ) -> PreconditionFailureCause:
-	## Checks whether the relevant command is allowable, given the situation
 	# examples:
 	# - can the unit can perform this operation on the specified target?
 	# - can the unit can place the specified building in the specified position?
@@ -51,22 +52,22 @@ func _target_is_in_range(a_actor: Commandable, range: float) -> bool:
 
 
 ### STATE UPDATES
+## Potentially return a new command based on a state check
 func get_updated_state(a_commandable: Commandable):
-	## Potentially return a new command based on a state check
 	return self
 
+## Check if the [Commandable] should move in response to the command
 func should_move(a_commandable: Commandable) -> bool:
 	return true
 
+## Check if the [Commandable] is ready to [fulfill_action]
 func can_act(a_commandable: Commandable) -> bool:
 	return false
 
+## Perform the characteristic action of this command and return whatever might be a follow-up [Command], or null otherwise
 func fulfill_action(a_commandable: Commandable) -> Variant:
 	push_error("no action should have been performed")
 	return self
-
-func is_finished() -> bool:
-	return false
 
 ### NODE
 func _init(a_message: CommandMessage) -> void:

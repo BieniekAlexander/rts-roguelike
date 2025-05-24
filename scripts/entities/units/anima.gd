@@ -2,32 +2,28 @@
 class_name Anima
 extends Unit
 
-static func command_evaluator_anima(a_actor: Commandable, a_message: CommandMessage):
-	if a_message.target is Star:
-		return PickUp
-	elif (
-		!a_actor.inventory.is_empty() 
-		and a_actor.inventory[0] is Star
-		and a_message.target.type==Entity.Type.STRUCTURE_OUTPOST
-	):
-		return DropOff
-	else:
-		return null
+static var command_patterns_anima: Array[Pattern] = [
+	Pattern.new(func(a): return a[1].target is Star, PickUp),
+	Pattern.new(func(a): return (
+		!a[0].inventory.is_empty() 
+		and a[0].inventory[0] is Star
+		and a[1].target.type==Entity.Type.STRUCTURE_OUTPOST
+	), DropOff)
+]
 
 static var anima_command_context: CommandContext = CommandContext.merge(
+	Commandable.get_command_context(),
 	CommandContext.new(
-		FU.default_evaluate([
-			command_evaluator_anima, Commandable.command_evaluator_commandable
-		]),
+		command_patterns_anima,
 		{
 			"command_ability": CommandContext.new(
-				Build,
-				{},
-				Build.get_valid_tool_names()
+				[
+					Pattern.new(func(a): return true, Build)
+				],
+				{}
 			)
 		}
-	),
-	Commandable.get_command_context()
+	)
 )
 
 static func get_command_context() -> CommandContext:

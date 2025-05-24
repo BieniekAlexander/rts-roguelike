@@ -11,19 +11,22 @@ extends CharacterBody3D
 @export var type: Type
 
 enum Type {
+	# 3 - Faction {0: generic, 1: tech}
+	# 2 - Type {0: entity, 1: unit, 2: structure}
+	# 1 - Index
+	# 0 - Index
 	UNDEFINED=-1,
-	STRUCTURE_MINE,
-	STRUCTURE_DWELLING,
-	STRUCTURE_OUTPOST,
-	STRUCTURE_LAB,
-	STRUCTURE_COMPOUND,
-	STRUCTURE_ARMORY,
-	UNIT_TECHNICIAN,
-	UNIT_SENTRY,
-	UNIT_VANGUARD
+	STRUCTURE_OUTPOST=0x1200,
+	STRUCTURE_DWELLING=0x1201,
+	STRUCTURE_MINE=0x1202,
+	STRUCTURE_LAB=0x1203,
+	STRUCTURE_COMPOUND=0x1204,
+	STRUCTURE_ARMORY=0x1205,
+	UNIT_TECHNICIAN=0x1100,
+	UNIT_SENTRY=0x1101,
+	UNIT_VANGUARD=0x1102
 }
 
-var freed: bool = false
 var _commander: Commander
 var commander: Commander:
 	get: return _commander
@@ -48,6 +51,7 @@ const TEAM_COLOR_MAP: Dictionary = {
 ### COLLISION
 var xz_position: Vector2:
 	get: return VU.inXZ(global_position)
+	set(value): global_position = VU.fromXZ(value)
 
 var map: Map
 var pc_set: Set = Set.new()
@@ -93,5 +97,4 @@ func _on_death() -> void:
 	for coords: Vector2i in pc_set.get_values():
 		map.spatial_partition_grid[coords.x][coords.y].remove(self)
 	
-	freed = true # NOTE: I'm hacking this in because structures are not being recognized as freed, FIX, IDK WHY THIS IS HAPPENING, maybe physicsprocess priority?
 	queue_free()

@@ -10,51 +10,6 @@ static var unit_weapon_patterns: Array[Pattern] = [
 static func get_weapon_evaluation_patterns() -> Array:
 	return unit_weapon_patterns
 
-## COMMANDS
-@export var SPEED: float = .1
-@onready var SPEED_PER_SECOND: float = SPEED*Engine.physics_ticks_per_second
-
-## NAVIGATION AGENT
-@onready var _nav_agent: NavigationAgent3D = $NavigationAgent
-@onready var _stop_timer: Timer = $Timer
-
-func _on_velocity_computed(a_velocity: Vector3) -> void:
-	## Update the position of the unit according to the navmesh's handle on our velocity
-	velocity = a_velocity
-	
-	if velocity!=Vector3.ZERO:
-		if move_and_slide():
-			var c := get_slide_collision_count()
-			for i in range(c):
-				var collider = get_slide_collision(i).get_collider()
-				if collider is Unit and collider._command==null:
-					if _stop_timer.is_stopped():
-						_command = null
-		
-		spatial_partition_dirty = true
-
-func _update_velocity() -> void:
-	if _command==null:
-		_nav_agent.set_velocity(Vector3.ZERO)
-	elif _command.can_act(self):
-		var new_commands = _command.fulfill_action(self)
-		
-		if new_commands!=_command:
-			update_commands(new_commands, true, true)
-		_nav_agent.set_velocity(Vector3.ZERO)
-	elif !_command.should_move(self):
-		_nav_agent.set_velocity(Vector3.ZERO)
-	elif !_nav_agent.is_navigation_finished():
-		var next_path_position: Vector3 = _nav_agent.get_next_path_position()
-		var prelim_velocity = global_position.direction_to(next_path_position)*SPEED_PER_SECOND
-		_nav_agent.set_velocity(prelim_velocity)
-	else:
-		_command = null
-		_nav_agent.set_velocity(Vector3.ZERO)
-
-func load_destination(command: Command):
-	_nav_agent.set_target_position(_command.message.position)
-
 ## NODE
 func _ready() -> void:
 	super()
@@ -66,23 +21,7 @@ func _ready() -> void:
 
 func initialize(a_map: Map, a_commander: Commander):
 	super(a_map, a_commander)
-	
 
-func _update_state() -> void:
-	super()
-	
-	if _command!=null and _nav_agent.target_position != _command.message.position:
-			load_destination(_command)
-			_stop_timer.start()
-	elif _nav_agent.is_navigation_finished():
-		_nav_agent.set_target_position(global_position)
-
-func _physics_process(delta: float) -> void:
-	if Engine.is_editor_hint():
-		return
-		
-	_update_state()
-	_update_velocity()
 
 func _process(delta: float) -> void:
 	super(delta)

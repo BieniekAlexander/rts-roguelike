@@ -12,7 +12,6 @@ static func eval(
 		if pattern.condition.call(a_evalution_input):
 			return pattern.result
 	
-	push_error("Uncovered target for this interaction %s" % a_evalution_input)
 	return a_default
 
 

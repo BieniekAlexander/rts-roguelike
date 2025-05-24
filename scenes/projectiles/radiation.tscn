@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://l2lvwietvqjt"]
+
+[ext_resource type="Script" uid="uid://cvdkkvv5cy6f7" path="res://scripts/entities/hit_box.gd" id="1_5vyqb"]
+[ext_resource type="Texture2D" uid="uid://b06ixdn7o8rgi" path="res://assets/rtsWorker.png" id="2_3mb8d"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_5vyqb"]
+
+[node name="Radiation" type="CharacterBody3D"]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+script = ExtResource("1_5vyqb")
+sight_range = 5
+
+[node name="Sprite" type="Sprite3D" parent="."]
+transform = Transform3D(100, 0, 0, 0, 70.7107, 70.7107, 0, -70.7107, 70.7107, 0, 0, 0)
+render_priority = 5
+texture = ExtResource("2_3mb8d")
+
+[node name="Collider" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_5vyqb")

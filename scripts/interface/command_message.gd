@@ -12,6 +12,9 @@ var position: Vector3:
 			return VU.onXZ(target.global_position)
 		else:
 			return world_position
+			
+var xz_position: Vector2:
+	get: return VU.inXZ(position)
 
 
 ## NODE

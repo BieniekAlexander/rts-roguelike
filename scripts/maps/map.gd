@@ -11,6 +11,30 @@ const TILE_WIDTH = HexCell.TILE_SIZE*2.0
 const TILE_HORIZ = TILE_WIDTH * .75
 const TILE_HEIGHT = TILE_WIDTH * sqrt(3)/2.0
 
+func parse_grid_coordinates(coords: Vector2i) -> Vector2i:
+	return Vector2i(
+		coords.x if coords.x>=0 else evenq_grid_width-coords.x,
+		coords.y if coords.y>=0 else evenq_grid_height-coords.y
+	)
+
+## Add a game [Entity] to the map, allowing the [Map] to govern it in the game world
+func add_entity(a_entity: Entity, a_location: Vector2, a_commander: Commander) -> void:
+	a_entity.initialize(self, a_commander)
+	
+	if a_entity is Structure:
+		var loc: Vector2i = Vector2i(HU.world_to_evenq(a_location))
+		add_structure(a_entity, loc, 0, false)
+	else:
+		a_entity.global_position = VU.fromXZ(
+			SU.get_nonoverlapping_points(
+				self,
+				a_location,
+				a_entity.collision_radius,
+				5.
+			)[0]
+		)+.5*Vector3.UP
+	
+	reassign_entity_in_spatial_partition(a_entity)
 
 func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: int, rebake: bool = true) -> void:
 	var cells: Set = Set.new()
@@ -30,7 +54,7 @@ func add_structure(a_structure: Structure, evenq_location: Vector2i, rotation: i
 		if a_structure is Mine:
 			cell.set_deposit()
 			# TODO not a good spot for this - but I'm looking to guarantee that,
-			# if the game adds a well somewhere, it forces the tile to be a spring
+			# if the game adds a mine somewhere, it forces the tile to have ore
 	
 	# TODO maybe find better solution - guarantee that the structure's position
 	# is in the center of the cells that it's occupying
@@ -90,7 +114,9 @@ func get_nearby_entities(xz_position: Vector2, radius: float) -> Array:
 	var ret: Set = Set.new()
 	
 	for coordinates: Vector2i in get_nearby_spatial_partitions(xz_position, radius).get_values():
-		ret.add_all(spatial_partition_grid[coordinates.x][coordinates.y].get_values())
+		for e: Entity in spatial_partition_grid[coordinates.x][coordinates.y].get_values():
+			if (xz_position-e.xz_position).length_squared() < radius*radius:
+				ret.add(e)
 	
 	return ret.get_values()
 

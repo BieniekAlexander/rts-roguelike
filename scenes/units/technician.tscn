@@ -9,6 +9,7 @@ script = ExtResource("2_bfkh4")
 SPEED = 0.2
 attributes_list = Array[int]([1])
 AGGRO_RANGE = 100.0
+type = 4352
 sight_range = 10
 
 [node name="Sprite" parent="." index="2"]

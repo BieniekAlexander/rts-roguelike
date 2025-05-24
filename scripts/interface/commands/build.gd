@@ -3,18 +3,17 @@ extends Command
 
 var build_cells: Set = null
 
-
-static var build_tool_names: Array = [
-	"command_tool_outpost",
-	"command_tool_dwelling",
-	"command_tool_mine",
-	"command_tool_lab",
-	"command_tool_compound",
-	"command_tool_armory"
-]
-
-static func get_valid_tool_names() -> Array:
-	return build_tool_names
+static func tool_applies_to(command_tool_name: String, entity_type: Entity.Type) -> bool:
+	return command_tool_name in {
+		Entity.Type.UNIT_TECHNICIAN: [
+			"command_tool_outpost",
+			"command_tool_dwelling",
+			"command_tool_mine",
+			"command_tool_lab",
+			"command_tool_compound",
+			"command_tool_armory",
+		]
+	}.get(entity_type, [])
 
 static func meets_precondition(a_actor: Commandable, a_message: CommandMessage) -> PreconditionFailureCause:
 	if a_message.tool==null:
@@ -38,7 +37,8 @@ func fulfill_action(a_actor: Commandable) -> Variant:
 	var hex_location: Vector2i = HU.world_to_evenq(VU.inXZ(message.world_position))
 	
 	new_structure.initialize(message.map, a_actor.commander)
-	message.map.add_structure(new_structure, hex_location, 0)
+	#message.map.add_structure(new_structure, hex_location, 0)
+	message.map.add_entity(new_structure, message.xz_position, a_actor.commander)
 	new_structure.build_progress = .1
 	
 	return Repair.new(CommandMessage.new(message.map, new_structure))

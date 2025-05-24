@@ -60,9 +60,10 @@ static func command_evaluator_structure(a_actor: Commandable, a_message: Command
 
 static var structure_command_context: CommandContext = CommandContext.merge(
 	CommandContext.new(
-		command_evaluator_structure,
-		{},
-		Train.get_valid_tool_names()
+		[
+			Pattern.new(func(a): return a[1].tool!=null, Train),
+			Pattern.new(func(a): return true, Command)
+		]
 	),
 	Commandable.get_command_context()
 )
@@ -91,17 +92,8 @@ func _ready() -> void:
 	add_to_group("structure")
 	super()
 
-func _update_state() -> void:
-	super()
-	
-	if !training_queue.is_empty():
-		training_queue[0][0] -= 1 # NOTE remove hardcode, as below
-		
-		if training_queue[0][0]<=0:  # NOTE remove hardcode, as below
-			var spec: Variant = training_queue.pop_front()
-			train(spec[1])
-			
-	
+func _process_commands() -> void:
+	# override for now, but maybe Train can be generalized
 	if _command != null:
 		if _command.get_script()==Command:
 			rally_command = _command
@@ -116,6 +108,16 @@ func _update_state() -> void:
 				commander.use_resources_for(_command.message.tool.type)
 			
 			_command = null
+
+func _update_state() -> void:
+	super()
+	
+	if !training_queue.is_empty():
+		training_queue[0][0] -= 1 # NOTE remove hardcode, as below
+		
+		if training_queue[0][0]<=0:  # NOTE remove hardcode, as below
+			var spec: Variant = training_queue.pop_front()
+			train(spec[1])
 
 func _process(delta: float) -> void:
 	super(delta)
@@ -132,8 +134,11 @@ func initialize(a_map: Map, a_commander: Commander):
 	commander.population_max += population_provided
 	commander.population_used += population_required
 
+## Perform clean-up actions on the death of this unit
 func _on_death() -> void:
-	commander.remove_structure(self)
+	if commander!=null: # do this better
+		commander.remove_structure(self)
+	
 	map.remove_structure(self)
 	
 	if commander!=null:

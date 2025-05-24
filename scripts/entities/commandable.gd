@@ -34,30 +34,37 @@ func receive_damage(attacker: Commandable, amount: float) -> void:
 			true,
 			true
 		)
-		
-static func command_evaluator_commandable(a_actor: Commandable, a_message: CommandMessage) -> Script:
-	return Attack if (
-		a_message.target!=null
-		and a_message.target.commander_id!=a_actor.commander_id
-		and Pattern.eval(a_actor.get_weapon_evaluation_patterns(), a_message.target) != null
-	) else Command
 
-#static var commandable_command_context: CommandContext = CommandContext.new(
-		#command_evaluator_commandable,
-		#{
-			#"command_attack_move": CommandContext.new(AttackMove.evaluator),
-			#"command_stop": CommandContext.new(Stop)
-		#}
-	#)
+static var _commandable_command_context: CommandContext
 
 static func get_command_context() -> CommandContext:
-	return CommandContext.new(
-		command_evaluator_commandable,
-		{
-			"command_attack_move": CommandContext.new(AttackMove.evaluator),
-			"command_stop": CommandContext.new(Stop)
-		}
-	)
+	if _commandable_command_context==null:
+		_commandable_command_context = CommandContext.new(
+			[
+				Pattern.new(
+					func(a): return (
+					a[1].target!=null
+					and a[1].target is Commandable
+					and a[1].target.commander_id!=a[0].commander_id
+					and Pattern.eval(a[0].get_weapon_evaluation_patterns(), a[1].target) != null	
+					), Attack
+				),
+				Pattern.new(func(a): return true, Command)
+			],
+			{
+				"command_attack_move": CommandContext.new(
+					[
+						Pattern.new(func(a): return a[1].target!=null and a[1].target is Commandable, Attack),
+						Pattern.new(func(a): return true, AttackMove)
+					]
+				),
+				"command_stop": CommandContext.new(
+					[Pattern.new(func(a): return true, Stop)]
+				)
+			}
+		)
+	
+	return _commandable_command_context
 
 ### COMMANDS
 @export var AGGRO_RANGE: float = 5
@@ -119,33 +126,79 @@ func _process(delta: float) -> void:
 		print("position: %s" % global_position)
 
 
+## NAVIGATION AGENT
+@export var SPEED: float = .1
+@onready var SPEED_PER_SECOND: float = SPEED*Engine.physics_ticks_per_second
+@onready var _nav_agent: NavigationAgent3D = get_node_or_null("NavigationAgent")
+@onready var _stop_timer: Timer = get_node_or_null("Timer")
+
+func _on_velocity_computed(a_velocity: Vector3) -> void:
+	## Update the position of the unit according to the navmesh's handle on our velocity
+	velocity = a_velocity
+	
+	if velocity!=Vector3.ZERO:
+		if move_and_slide():
+			var c := get_slide_collision_count()
+			for i in range(c):
+				var collider = get_slide_collision(i).get_collider()
+				if collider is Unit and collider._command==null:
+					if _stop_timer.is_stopped():
+						_command = null
+		
+		spatial_partition_dirty = true
+
+func load_destination(command: Command):
+	_nav_agent.set_target_position(_command.message.position)
+
+
 ### NODE
 func _ready() -> void:
 	super()
 	add_to_group("commandable")
 	attributes = Set.new(attributes_list)
 
+## Perform any sort of command handling
+func _process_commands() -> void:
+	var new_commands: Variant  = _command.get_updated_state(self) if _command!=null else _fallback_command.get_updated_state(self)
+	
+	if is_same(new_commands, null):
+		_command = null
+	elif !is_same(new_commands, _command) and !is_same(new_commands, null):
+		update_commands(new_commands, true, true)
+	elif _command.can_act(self):
+		new_commands = _command.fulfill_action(self)
+		_nav_agent.set_velocity(Vector3.ZERO)
+		
+		if is_same(new_commands, null):
+			_command = null
+		if new_commands!=_command and !is_same(new_commands, null):
+			_command = null
+			update_commands(new_commands, true, true)
+	elif _nav_agent!=null and _command.should_move(self):
+			if _nav_agent.target_position != _command.message.position:
+				load_destination(_command)
+				_stop_timer.start()
+			
+			if !_nav_agent.is_navigation_finished():
+				var next_path_position: Vector3 = _nav_agent.get_next_path_position()
+				var prelim_velocity = global_position.direction_to(next_path_position)*SPEED_PER_SECOND
+				_nav_agent.set_velocity(prelim_velocity)
+			else:
+				_nav_agent.set_target_position(global_position)
+				_command = null	
+
 func _update_state() -> void:
 	if hp <= 0:
 		_on_death()
+		return
 	
 	if attack_timer>0:
 		attack_timer-=1
-
-	if _command!=null && _command.is_finished():
-		_command = null
-	
-	if _command == null and not _command_queue.is_empty():
+		
+	if _command==null and not _command_queue.is_empty():
 		_command = _command_queue.pop_front()
 	
-	var new_commands = _command.get_updated_state(self) if _command!=null else _fallback_command.get_updated_state(self)
-	
-	if (
-		!is_same(new_commands, null)
-	 	and !is_same(new_commands, _fallback_command)
-		and (new_commands is Array or new_commands!=_command)
-	):
-		update_commands(new_commands, true, true)
+	_process_commands()
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint(): return
@@ -163,8 +216,8 @@ func set_deselected() -> void:
 	if hp==hpMax:
 		$HPBar.visible = false
 
+## Update the commandable's commands, accounting for queueing and arrays of commands
 func update_commands(a_commands: Variant, add_to_queue: bool = false, prepend: bool = false) -> void:
-	## Update the commandable's commands, accounting for queueing and arrays of commands
 	if a_commands == null:
 		_command_queue = []
 		_command = null

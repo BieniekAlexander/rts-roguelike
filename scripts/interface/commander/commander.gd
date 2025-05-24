@@ -13,7 +13,7 @@ extends Node
 @onready var ore: int = 500
 @onready var population_used: int = 0
 @onready var population_max: int = 0
-@onready var dominion: int = 300
+@onready var dominion: int = 0
 var population:
 	get: return population_max-population_used
 

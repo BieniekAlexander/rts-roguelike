@@ -13,13 +13,14 @@ material = SubResource("StandardMaterial3D_ihkwo")
 
 [node name="Unit" instance=ExtResource("1_au4so")]
 script = ExtResource("2_usw5g")
-SPEED = 0.17
 attributes_list = Array[int]([1])
 hpMax = 120.0
 AGGRO_RANGE = 100.0
 DAMAGE = 20.0
 ATTACK_RANGE = 8.0
 ATTACK_DURATION = 30
+SPEED = 0.17
+type = 4354
 sight_range = 10
 
 [node name="Sprite" parent="." index="2"]

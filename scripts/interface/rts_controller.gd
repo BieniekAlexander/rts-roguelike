@@ -64,10 +64,15 @@ func _ready():
 func _process(delta: float) -> void:
 	command_message.world_position = camera.get_mouse_world_position(mouse_position)
 	command_message.target = get_cursor_target(mouse_position)
+	
+	for i in range(selection.size()-1, -1, -1):
+		if not is_instance_valid(selection[i]):
+			selection.remove_at(i)
+	
 	current_command_type = active_command_context.evaluate_command(
-		selection[0] if !selection.is_empty() else null,
+		selection[0],
 		command_message
-	)
+	) if !selection.is_empty() else null
 	
 	if current_command_type==null:
 		Input.set_custom_mouse_cursor(free_cursor)
@@ -124,7 +129,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## CONTEXT SETTING
 func process_command(command_name: String) -> void:
 	if command_name.contains("tool"):
-		if active_command_context.has(command_name):
+		if active_command_context.command_available(command_name, selection[0]):
 			command_message.tool = Tool.command_tool_map[command_name]
 	elif command_name.begins_with("command"):
 		active_command_context = active_command_context.get_new_context(command_name)
@@ -137,7 +142,7 @@ func process_command(command_name: String) -> void:
 		command_message
 	)
 	
-	if not command.requires_position():
+	if command!=null and not command.requires_position():
 		assign_command_to_units(
 			command,
 			command_message,
@@ -199,6 +204,7 @@ func set_selected_units():
 	
 	for c: Commandable in get_tree().get_nodes_in_group("commandable"):
 		# TODO collect units from spatial partitioning
+		if c.commander_id!=1: continue
 		var selected_screen_position = camera.unproject_position(c.global_position)
 		if Geometry2D.is_point_in_polygon(selected_screen_position, selection_box_geometry):
 			selection.append(c)
@@ -226,7 +232,7 @@ func assign_command_to_units(
 	add_to_queue: bool
 ) -> bool:
 	# Returns whether or not the command was successfully assigned to any units
-	var selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
+	selection = selection.filter(func(u): return is_instance_valid(u)) # TODO refactor so I dont have to do this smh
 	
 	if selection.size()==0:
 		push_error("no selections")
@@ -274,7 +280,9 @@ func upate_hud_buttons() -> void:
 	# TODO definitely gonna refactor
 	for child: BoxContainer in $CommandsView.get_children():
 		for subchild: Button in child.get_children():
-			subchild.visible = active_command_context.has(subchild.name)
+			subchild.visible = !selection.is_empty() and active_command_context.command_available(
+				subchild.name, selection[0]
+			)
 
 ### HUD signals
 func _on_control_button_pressed(control_name: String) -> void:

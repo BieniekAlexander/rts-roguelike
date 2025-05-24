@@ -1,3 +1,4 @@
+CollisionShape3D
 RichTextLabel
 HBoxContainer
 BoxContainer
@@ -12,4 +13,3 @@ Node3D
 TextureButton
 ColorRect
 MeshInstance3D
-Line2D

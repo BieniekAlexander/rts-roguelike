@@ -24,6 +24,7 @@ gradient = SubResource("Gradient_agsmt")
 script = ExtResource("2_3agr1")
 AGGRO_RANGE = 1.0
 DAMAGE = 5.0
+type = -1
 
 [node name="NavigationAgent" type="NavigationAgent3D" parent="."]
 path_desired_distance = 0.5
